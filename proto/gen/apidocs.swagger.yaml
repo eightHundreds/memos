@@ -131,10 +131,12 @@ paths:
           type: string
       tags:
         - AttachmentService
-  /api/v1/auth/signin:
+  /api/v1/auth/sessions:
     post:
-      summary: SignIn signs in the user.
-      operationId: AuthService_SignIn
+      summary: |-
+        CreateSession authenticates a user and creates a new session.
+        Returns the authenticated user information upon successful authentication.
+      operationId: AuthService_CreateSession
       responses:
         "200":
           description: A successful response.
@@ -145,43 +147,19 @@ paths:
           schema:
             $ref: '#/definitions/googlerpcStatus'
       parameters:
-        - name: passwordCredentials.username
-          description: The username to sign in with.
-          in: query
-          required: false
-          type: string
-        - name: passwordCredentials.password
-          description: The password to sign in with.
-          in: query
-          required: false
-          type: string
-        - name: ssoCredentials.idpId
-          description: The ID of the SSO provider.
-          in: query
-          required: false
-          type: integer
-          format: int32
-        - name: ssoCredentials.code
-          description: The code to sign in with.
-          in: query
-          required: false
-          type: string
-        - name: ssoCredentials.redirectUri
-          description: The redirect URI.
-          in: query
-          required: false
-          type: string
-        - name: neverExpire
-          description: Whether the session should never expire.
-          in: query
-          required: false
-          type: boolean
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/v1CreateSessionRequest'
       tags:
         - AuthService
-  /api/v1/auth/signout:
-    post:
-      summary: SignOut signs out the user.
-      operationId: AuthService_SignOut
+  /api/v1/auth/sessions/current:
+    delete:
+      summary: |-
+        DeleteSession terminates the current user session.
+        This is an idempotent operation that invalidates the user's authentication.
+      operationId: AuthService_DeleteSession
       responses:
         "200":
           description: A successful response.
@@ -194,35 +172,11 @@ paths:
             $ref: '#/definitions/googlerpcStatus'
       tags:
         - AuthService
-  /api/v1/auth/signup:
-    post:
-      summary: SignUp signs up the user with the given username and password.
-      operationId: AuthService_SignUp
-      responses:
-        "200":
-          description: A successful response.
-          schema:
-            $ref: '#/definitions/v1User'
-        default:
-          description: An unexpected error response.
-          schema:
-            $ref: '#/definitions/googlerpcStatus'
-      parameters:
-        - name: username
-          description: The username to sign up with.
-          in: query
-          required: false
-          type: string
-        - name: password
-          description: The password to sign up with.
-          in: query
-          required: false
-          type: string
-      tags:
-        - AuthService
   /api/v1/auth/status:
-    post:
-      summary: GetAuthStatus returns the current auth status of the user.
+    get:
+      summary: |-
+        GetAuthStatus returns the current authentication status of the user.
+        This method is idempotent and safe, suitable for checking authentication state.
       operationId: AuthService_GetAuthStatus
       responses:
         "200":
@@ -233,6 +187,29 @@ paths:
           description: An unexpected error response.
           schema:
             $ref: '#/definitions/googlerpcStatus'
+      tags:
+        - AuthService
+  /api/v1/auth/users:
+    post:
+      summary: |-
+        RegisterUser creates a new user account with username and password.
+        Returns the newly created user information upon successful registration.
+      operationId: AuthService_RegisterUser
+      responses:
+        "200":
+          description: A successful response.
+          schema:
+            $ref: '#/definitions/v1User'
+        default:
+          description: An unexpected error response.
+          schema:
+            $ref: '#/definitions/googlerpcStatus'
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/v1RegisterUserRequest'
       tags:
         - AuthService
   /api/v1/identityProviders:
@@ -292,41 +269,11 @@ paths:
           type: string
       tags:
         - IdentityProviderService
-  /api/v1/inboxes:
+  /api/v1/markdown/links:getMetadata:
     get:
-      summary: ListInboxes lists inboxes for a user.
-      operationId: InboxService_ListInboxes
-      responses:
-        "200":
-          description: A successful response.
-          schema:
-            $ref: '#/definitions/v1ListInboxesResponse'
-        default:
-          description: An unexpected error response.
-          schema:
-            $ref: '#/definitions/googlerpcStatus'
-      parameters:
-        - name: user
-          description: 'Format: users/{user}'
-          in: query
-          required: false
-          type: string
-        - name: pageSize
-          description: The maximum number of inbox to return.
-          in: query
-          required: false
-          type: integer
-          format: int32
-        - name: pageToken
-          description: Provide this to retrieve the subsequent page.
-          in: query
-          required: false
-          type: string
-      tags:
-        - InboxService
-  /api/v1/markdown/link:metadata:
-    get:
-      summary: GetLinkMetadata returns metadata for a given link.
+      summary: |-
+        GetLinkMetadata returns metadata for a given link.
+        This is useful for generating link previews.
       operationId: MarkdownService_GetLinkMetadata
       responses:
         "200":
@@ -339,56 +286,17 @@ paths:
             $ref: '#/definitions/googlerpcStatus'
       parameters:
         - name: link
+          description: The link URL to get metadata for.
           in: query
-          required: false
+          required: true
           type: string
-      tags:
-        - MarkdownService
-  /api/v1/markdown/node:restore:
-    post:
-      summary: RestoreMarkdownNodes restores the given nodes to markdown content.
-      operationId: MarkdownService_RestoreMarkdownNodes
-      responses:
-        "200":
-          description: A successful response.
-          schema:
-            $ref: '#/definitions/v1RestoreMarkdownNodesResponse'
-        default:
-          description: An unexpected error response.
-          schema:
-            $ref: '#/definitions/googlerpcStatus'
-      parameters:
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/v1RestoreMarkdownNodesRequest'
-      tags:
-        - MarkdownService
-  /api/v1/markdown/node:stringify:
-    post:
-      summary: StringifyMarkdownNodes stringify the given nodes to plain text content.
-      operationId: MarkdownService_StringifyMarkdownNodes
-      responses:
-        "200":
-          description: A successful response.
-          schema:
-            $ref: '#/definitions/v1StringifyMarkdownNodesResponse'
-        default:
-          description: An unexpected error response.
-          schema:
-            $ref: '#/definitions/googlerpcStatus'
-      parameters:
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/v1StringifyMarkdownNodesRequest'
       tags:
         - MarkdownService
   /api/v1/markdown:parse:
     post:
-      summary: ParseMarkdown parses the given markdown content and returns a list of nodes.
+      summary: |-
+        ParseMarkdown parses the given markdown content and returns a list of nodes.
+        This is a utility method that transforms markdown text into structured nodes.
       operationId: MarkdownService_ParseMarkdown
       responses:
         "200":
@@ -407,6 +315,52 @@ paths:
             $ref: '#/definitions/v1ParseMarkdownRequest'
       tags:
         - MarkdownService
+  /api/v1/markdown:restore:
+    post:
+      summary: |-
+        RestoreMarkdownNodes restores the given nodes to markdown content.
+        This is the inverse operation of ParseMarkdown.
+      operationId: MarkdownService_RestoreMarkdownNodes
+      responses:
+        "200":
+          description: A successful response.
+          schema:
+            $ref: '#/definitions/v1RestoreMarkdownNodesResponse'
+        default:
+          description: An unexpected error response.
+          schema:
+            $ref: '#/definitions/googlerpcStatus'
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/v1RestoreMarkdownNodesRequest'
+      tags:
+        - MarkdownService
+  /api/v1/markdown:stringify:
+    post:
+      summary: |-
+        StringifyMarkdownNodes stringify the given nodes to plain text content.
+        This removes all markdown formatting and returns plain text.
+      operationId: MarkdownService_StringifyMarkdownNodes
+      responses:
+        "200":
+          description: A successful response.
+          schema:
+            $ref: '#/definitions/v1StringifyMarkdownNodesResponse'
+        default:
+          description: An unexpected error response.
+          schema:
+            $ref: '#/definitions/googlerpcStatus'
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/v1StringifyMarkdownNodesRequest'
+      tags:
+        - MarkdownService
   /api/v1/memos:
     get:
       summary: ListMemos lists memos with pagination and filter.
@@ -423,27 +377,32 @@ paths:
       parameters:
         - name: parent
           description: |-
-            The parent is the owner of the memos.
+            Optional. The parent is the owner of the memos.
             If not specified or `users/-`, it will list all memos.
+            Format: users/{user}
           in: query
           required: false
           type: string
         - name: pageSize
-          description: The maximum number of memos to return.
+          description: |-
+            Optional. The maximum number of memos to return.
+            The service may return fewer than this value.
+            If unspecified, at most 50 memos will be returned.
+            The maximum value is 1000; values above 1000 will be coerced to 1000.
           in: query
           required: false
           type: integer
           format: int32
         - name: pageToken
           description: |-
-            A page token, received from a previous `ListMemos` call.
+            Optional. A page token, received from a previous `ListMemos` call.
             Provide this to retrieve the subsequent page.
           in: query
           required: false
           type: string
         - name: state
           description: |-
-            The state of the memos to list.
+            Optional. The state of the memos to list.
             Default to `NORMAL`. Set to `ARCHIVED` to list archived memos.
           in: query
           required: false
@@ -453,32 +412,27 @@ paths:
             - NORMAL
             - ARCHIVED
           default: STATE_UNSPECIFIED
-        - name: sort
+        - name: orderBy
           description: |-
-            What field to sort the results by.
-            Default to display_time.
+            Optional. The order to sort results by.
+            Default to "display_time desc".
+            Example: "display_time desc" or "create_time asc"
           in: query
           required: false
           type: string
-        - name: direction
-          description: |-
-            The direction to sort the results by.
-            Default to DESC.
-          in: query
-          required: false
-          type: string
-          enum:
-            - DIRECTION_UNSPECIFIED
-            - ASC
-            - DESC
-          default: DIRECTION_UNSPECIFIED
         - name: filter
           description: |-
+            Optional. Filter to apply to the list results.
             Filter is a CEL expression to filter memos.
             Refer to `Shortcut.filter`.
           in: query
           required: false
           type: string
+        - name: showDeleted
+          description: Optional. If true, show deleted memos in the response.
+          in: query
+          required: false
+          type: boolean
         - name: oldFilter
           description: |-
             [Deprecated] Old filter contains some specific conditions to filter memos.
@@ -502,38 +456,30 @@ paths:
             $ref: '#/definitions/googlerpcStatus'
       parameters:
         - name: memo
-          description: The memo to create.
+          description: Required. The memo to create.
           in: body
           required: true
           schema:
             $ref: '#/definitions/apiv1Memo'
             required:
               - memo
-      tags:
-        - MemoService
-  /api/v1/reactions/{id}:
-    delete:
-      summary: DeleteMemoReaction deletes a reaction for a memo.
-      operationId: MemoService_DeleteMemoReaction
-      responses:
-        "200":
-          description: A successful response.
-          schema:
-            type: object
-            properties: {}
-        default:
-          description: An unexpected error response.
-          schema:
-            $ref: '#/definitions/googlerpcStatus'
-      parameters:
-        - name: id
+        - name: memoId
           description: |-
-            The id of the reaction.
-            Refer to the `Reaction.id`.
-          in: path
-          required: true
-          type: integer
-          format: int32
+            Optional. The memo ID to use for this memo.
+            If empty, a unique ID will be generated.
+          in: query
+          required: false
+          type: string
+        - name: validateOnly
+          description: Optional. If set, validate the request but don't actually create the memo.
+          in: query
+          required: false
+          type: boolean
+        - name: requestId
+          description: Optional. An idempotency token.
+          in: query
+          required: false
+          type: string
       tags:
         - MemoService
   /api/v1/users:
@@ -937,13 +883,14 @@ paths:
       parameters:
         - name: inbox.name
           description: |-
-            The name of the inbox.
-            Format: inboxes/{id}, id is the system generated auto-incremented id.
+            The resource name of the inbox.
+            Format: inboxes/{inbox}
           in: path
           required: true
           type: string
           pattern: inboxes/[^/]+
         - name: inbox
+          description: Required. The inbox to update.
           in: body
           required: true
           schema:
@@ -951,20 +898,40 @@ paths:
             properties:
               sender:
                 type: string
-                title: 'Format: users/{user}'
+                title: |-
+                  The sender of the inbox notification.
+                  Format: users/{user}
+                readOnly: true
               receiver:
                 type: string
-                title: 'Format: users/{user}'
+                title: |-
+                  The receiver of the inbox notification.
+                  Format: users/{user}
+                readOnly: true
               status:
                 $ref: '#/definitions/v1InboxStatus'
+                description: The status of the inbox notification.
               createTime:
                 type: string
                 format: date-time
+                description: Output only. The creation timestamp.
+                readOnly: true
               type:
                 $ref: '#/definitions/v1InboxType'
+                description: The type of the inbox notification.
+                readOnly: true
               activityId:
                 type: integer
                 format: int32
+                description: Optional. The activity ID associated with this inbox notification.
+            title: Required. The inbox to update.
+            required:
+              - inbox
+        - name: allowMissing
+          description: Optional. If set to true, allows updating missing fields.
+          in: query
+          required: false
+          type: boolean
       tags:
         - InboxService
   /api/v1/{memo.name}:
@@ -983,7 +950,7 @@ paths:
       parameters:
         - name: memo.name
           description: |-
-            The name of the memo.
+            The resource name of the memo.
             Format: memos/{memo}, memo is the user defined id or uuid.
           in: path
           required: true
@@ -991,7 +958,7 @@ paths:
           pattern: memos/[^/]+
         - name: memo
           description: |-
-            The memo to update.
+            Required. The memo to update.
             The `name` field is required.
           in: body
           required: true
@@ -1000,74 +967,98 @@ paths:
             properties:
               state:
                 $ref: '#/definitions/v1State'
+                description: The state of the memo.
               creator:
                 type: string
                 title: |-
                   The name of the creator.
                   Format: users/{user}
+                readOnly: true
               createTime:
                 type: string
                 format: date-time
+                description: Output only. The creation timestamp.
+                readOnly: true
               updateTime:
                 type: string
                 format: date-time
+                description: Output only. The last update timestamp.
+                readOnly: true
               displayTime:
                 type: string
                 format: date-time
+                description: The display timestamp of the memo.
               content:
                 type: string
+                description: Required. The content of the memo in Markdown format.
               nodes:
                 type: array
                 items:
                   type: object
                   $ref: '#/definitions/v1Node'
+                description: Output only. The parsed nodes from the content.
                 readOnly: true
               visibility:
                 $ref: '#/definitions/v1Visibility'
+                description: The visibility of the memo.
               tags:
                 type: array
                 items:
                   type: string
+                description: Output only. The tags extracted from the content.
                 readOnly: true
               pinned:
                 type: boolean
+                description: Whether the memo is pinned.
               attachments:
                 type: array
                 items:
                   type: object
                   $ref: '#/definitions/v1Attachment'
+                description: Optional. The attachments of the memo.
               relations:
                 type: array
                 items:
                   type: object
                   $ref: '#/definitions/v1MemoRelation'
+                description: Optional. The relations of the memo.
               reactions:
                 type: array
                 items:
                   type: object
                   $ref: '#/definitions/v1Reaction'
+                description: Output only. The reactions to the memo.
                 readOnly: true
               property:
                 $ref: '#/definitions/v1MemoProperty'
+                description: Output only. The computed properties of the memo.
                 readOnly: true
               parent:
                 type: string
                 title: |-
-                  The name of the parent memo.
-                  Format: memos/{id}
+                  Output only. The name of the parent memo.
+                  Format: memos/{memo}
                 readOnly: true
               snippet:
                 type: string
-                description: The snippet of the memo content. Plain text only.
+                description: Output only. The snippet of the memo content. Plain text only.
                 readOnly: true
               location:
                 $ref: '#/definitions/apiv1Location'
-                description: The location of the memo.
+                description: Optional. The location of the memo.
             title: |-
-              The memo to update.
+              Required. The memo to update.
               The `name` field is required.
             required:
+              - state
+              - content
+              - visibility
               - memo
+        - name: allowMissing
+          description: Optional. If set to true, allows updating sensitive fields.
+          in: query
+          required: false
+          type: boolean
       tags:
         - MemoService
   /api/v1/{name_1}:
@@ -1241,11 +1232,20 @@ paths:
             $ref: '#/definitions/googlerpcStatus'
       parameters:
         - name: name_4
-          description: The name of the memo.
+          description: |-
+            Required. The resource name of the memo.
+            Format: memos/{memo}
           in: path
           required: true
           type: string
           pattern: memos/[^/]+
+        - name: readMask
+          description: |-
+            Optional. The fields to return in the response.
+            If not specified, all fields are returned.
+          in: query
+          required: false
+          type: string
       tags:
         - MemoService
     delete:
@@ -1263,7 +1263,9 @@ paths:
             $ref: '#/definitions/googlerpcStatus'
       parameters:
         - name: name_4
-          description: The name of the inbox to delete.
+          description: |-
+            Required. The resource name of the inbox to delete.
+            Format: inboxes/{inbox}
           in: path
           required: true
           type: string
@@ -1309,11 +1311,18 @@ paths:
             $ref: '#/definitions/googlerpcStatus'
       parameters:
         - name: name_5
-          description: The name of the memo.
+          description: |-
+            Required. The resource name of the memo to delete.
+            Format: memos/{memo}
           in: path
           required: true
           type: string
           pattern: memos/[^/]+
+        - name: force
+          description: Optional. If set to true, the memo will be deleted even if it has associated data.
+          in: query
+          required: false
+          type: boolean
       tags:
         - MemoService
   /api/v1/{name_6}:
@@ -1348,8 +1357,8 @@ paths:
       tags:
         - WebhookService
     delete:
-      summary: DeleteShortcut deletes a shortcut for a user.
-      operationId: ShortcutService_DeleteShortcut
+      summary: DeleteMemoReaction deletes a reaction for a memo.
+      operationId: MemoService_DeleteMemoReaction
       responses:
         "200":
           description: A successful response.
@@ -1363,14 +1372,14 @@ paths:
       parameters:
         - name: name_6
           description: |-
-            Required. The resource name of the shortcut to delete.
-            Format: users/{user}/shortcuts/{shortcut}
+            Required. The resource name of the reaction to delete.
+            Format: reactions/{reaction}
           in: path
           required: true
           type: string
-          pattern: users/[^/]+/shortcuts/[^/]+
+          pattern: reactions/[^/]+
       tags:
-        - ShortcutService
+        - MemoService
   /api/v1/{name_7}:
     get:
       summary: Gets a workspace setting.
@@ -1396,6 +1405,31 @@ paths:
       tags:
         - WorkspaceService
     delete:
+      summary: DeleteShortcut deletes a shortcut for a user.
+      operationId: ShortcutService_DeleteShortcut
+      responses:
+        "200":
+          description: A successful response.
+          schema:
+            type: object
+            properties: {}
+        default:
+          description: An unexpected error response.
+          schema:
+            $ref: '#/definitions/googlerpcStatus'
+      parameters:
+        - name: name_7
+          description: |-
+            Required. The resource name of the shortcut to delete.
+            Format: users/{user}/shortcuts/{shortcut}
+          in: path
+          required: true
+          type: string
+          pattern: users/[^/]+/shortcuts/[^/]+
+      tags:
+        - ShortcutService
+  /api/v1/{name_8}:
+    delete:
       summary: DeleteWebhook deletes a webhook.
       operationId: WebhookService_DeleteWebhook
       responses:
@@ -1409,7 +1443,7 @@ paths:
           schema:
             $ref: '#/definitions/googlerpcStatus'
       parameters:
-        - name: name_7
+        - name: name_8
           description: |-
             Required. The resource name of the webhook to delete.
             Format: webhooks/{webhook}
@@ -1487,11 +1521,24 @@ paths:
             $ref: '#/definitions/googlerpcStatus'
       parameters:
         - name: name
-          description: The name of the memo.
+          description: |-
+            Required. The resource name of the memo.
+            Format: memos/{memo}
           in: path
           required: true
           type: string
           pattern: memos/[^/]+
+        - name: pageSize
+          description: Optional. The maximum number of attachments to return.
+          in: query
+          required: false
+          type: integer
+          format: int32
+        - name: pageToken
+          description: Optional. A page token for pagination.
+          in: query
+          required: false
+          type: string
       tags:
         - MemoService
     patch:
@@ -1509,7 +1556,9 @@ paths:
             $ref: '#/definitions/googlerpcStatus'
       parameters:
         - name: name
-          description: The name of the memo.
+          description: |-
+            Required. The resource name of the memo.
+            Format: memos/{memo}
           in: path
           required: true
           type: string
@@ -1560,11 +1609,29 @@ paths:
             $ref: '#/definitions/googlerpcStatus'
       parameters:
         - name: name
-          description: The name of the memo.
+          description: |-
+            Required. The resource name of the memo.
+            Format: memos/{memo}
           in: path
           required: true
           type: string
           pattern: memos/[^/]+
+        - name: pageSize
+          description: Optional. The maximum number of comments to return.
+          in: query
+          required: false
+          type: integer
+          format: int32
+        - name: pageToken
+          description: Optional. A page token for pagination.
+          in: query
+          required: false
+          type: string
+        - name: orderBy
+          description: Optional. The order to sort results by.
+          in: query
+          required: false
+          type: string
       tags:
         - MemoService
     post:
@@ -1581,17 +1648,26 @@ paths:
             $ref: '#/definitions/googlerpcStatus'
       parameters:
         - name: name
-          description: The name of the memo.
+          description: |-
+            Required. The resource name of the memo.
+            Format: memos/{memo}
           in: path
           required: true
           type: string
           pattern: memos/[^/]+
         - name: comment
-          description: The comment to create.
+          description: Required. The comment to create.
           in: body
           required: true
           schema:
             $ref: '#/definitions/apiv1Memo'
+            required:
+              - comment
+        - name: commentId
+          description: Optional. The comment ID to use.
+          in: query
+          required: false
+          type: string
       tags:
         - MemoService
   /api/v1/{name}/reactions:
@@ -1609,11 +1685,24 @@ paths:
             $ref: '#/definitions/googlerpcStatus'
       parameters:
         - name: name
-          description: The name of the memo.
+          description: |-
+            Required. The resource name of the memo.
+            Format: memos/{memo}
           in: path
           required: true
           type: string
           pattern: memos/[^/]+
+        - name: pageSize
+          description: Optional. The maximum number of reactions to return.
+          in: query
+          required: false
+          type: integer
+          format: int32
+        - name: pageToken
+          description: Optional. A page token for pagination.
+          in: query
+          required: false
+          type: string
       tags:
         - MemoService
     post:
@@ -1630,7 +1719,9 @@ paths:
             $ref: '#/definitions/googlerpcStatus'
       parameters:
         - name: name
-          description: The name of the memo.
+          description: |-
+            Required. The resource name of the memo.
+            Format: memos/{memo}
           in: path
           required: true
           type: string
@@ -1657,11 +1748,24 @@ paths:
             $ref: '#/definitions/googlerpcStatus'
       parameters:
         - name: name
-          description: The name of the memo.
+          description: |-
+            Required. The resource name of the memo.
+            Format: memos/{memo}
           in: path
           required: true
           type: string
           pattern: memos/[^/]+
+        - name: pageSize
+          description: Optional. The maximum number of relations to return.
+          in: query
+          required: false
+          type: integer
+          format: int32
+        - name: pageToken
+          description: Optional. A page token for pagination.
+          in: query
+          required: false
+          type: string
       tags:
         - MemoService
     patch:
@@ -1679,7 +1783,9 @@ paths:
             $ref: '#/definitions/googlerpcStatus'
       parameters:
         - name: name
-          description: The name of the memo.
+          description: |-
+            Required. The resource name of the memo.
+            Format: memos/{memo}
           in: path
           required: true
           type: string
@@ -1810,6 +1916,63 @@ paths:
           type: string
       tags:
         - UserService
+  /api/v1/{parent}/inboxes:
+    get:
+      summary: ListInboxes lists inboxes for a user.
+      operationId: InboxService_ListInboxes
+      responses:
+        "200":
+          description: A successful response.
+          schema:
+            $ref: '#/definitions/v1ListInboxesResponse'
+        default:
+          description: An unexpected error response.
+          schema:
+            $ref: '#/definitions/googlerpcStatus'
+      parameters:
+        - name: parent
+          description: |-
+            Required. The parent resource whose inboxes will be listed.
+            Format: users/{user}
+          in: path
+          required: true
+          type: string
+          pattern: users/[^/]+
+        - name: pageSize
+          description: |-
+            Optional. The maximum number of inboxes to return.
+            The service may return fewer than this value.
+            If unspecified, at most 50 inboxes will be returned.
+            The maximum value is 1000; values above 1000 will be coerced to 1000.
+          in: query
+          required: false
+          type: integer
+          format: int32
+        - name: pageToken
+          description: |-
+            Optional. A page token, received from a previous `ListInboxes` call.
+            Provide this to retrieve the subsequent page.
+          in: query
+          required: false
+          type: string
+        - name: filter
+          description: |-
+            Optional. Filter to apply to the list results.
+            Example: "status=UNREAD" or "type=MEMO_COMMENT"
+            Supported operators: =, !=
+            Supported fields: status, type, sender, create_time
+          in: query
+          required: false
+          type: string
+        - name: orderBy
+          description: |-
+            Optional. The order to sort results by.
+            Example: "create_time desc" or "status asc"
+          in: query
+          required: false
+          type: string
+      tags:
+        - InboxService
   /api/v1/{parent}/memos:
     get:
       summary: ListMemos lists memos with pagination and filter.
@@ -1826,28 +1989,33 @@ paths:
       parameters:
         - name: parent
           description: |-
-            The parent is the owner of the memos.
+            Optional. The parent is the owner of the memos.
             If not specified or `users/-`, it will list all memos.
+            Format: users/{user}
           in: path
           required: true
           type: string
           pattern: users/[^/]+
         - name: pageSize
-          description: The maximum number of memos to return.
+          description: |-
+            Optional. The maximum number of memos to return.
+            The service may return fewer than this value.
+            If unspecified, at most 50 memos will be returned.
+            The maximum value is 1000; values above 1000 will be coerced to 1000.
           in: query
           required: false
           type: integer
           format: int32
         - name: pageToken
           description: |-
-            A page token, received from a previous `ListMemos` call.
+            Optional. A page token, received from a previous `ListMemos` call.
             Provide this to retrieve the subsequent page.
           in: query
           required: false
           type: string
         - name: state
           description: |-
-            The state of the memos to list.
+            Optional. The state of the memos to list.
             Default to `NORMAL`. Set to `ARCHIVED` to list archived memos.
           in: query
           required: false
@@ -1857,32 +2025,27 @@ paths:
             - NORMAL
             - ARCHIVED
           default: STATE_UNSPECIFIED
-        - name: sort
+        - name: orderBy
           description: |-
-            What field to sort the results by.
-            Default to display_time.
+            Optional. The order to sort results by.
+            Default to "display_time desc".
+            Example: "display_time desc" or "create_time asc"
           in: query
           required: false
           type: string
-        - name: direction
-          description: |-
-            The direction to sort the results by.
-            Default to DESC.
-          in: query
-          required: false
-          type: string
-          enum:
-            - DIRECTION_UNSPECIFIED
-            - ASC
-            - DESC
-          default: DIRECTION_UNSPECIFIED
         - name: filter
           description: |-
+            Optional. Filter to apply to the list results.
             Filter is a CEL expression to filter memos.
             Refer to `Shortcut.filter`.
           in: query
           required: false
           type: string
+        - name: showDeleted
+          description: Optional. If true, show deleted memos in the response.
+          in: query
+          required: false
+          type: boolean
         - name: oldFilter
           description: |-
             [Deprecated] Old filter contains some specific conditions to filter memos.
@@ -1980,17 +2143,19 @@ paths:
       parameters:
         - name: parent
           description: |-
-            The parent, who owns the tags.
-            Format: memos/{id}. Use "memos/-" to delete all tags.
+            Required. The parent, who owns the tags.
+            Format: memos/{memo}. Use "memos/-" to delete all tags.
           in: path
           required: true
           type: string
           pattern: memos/[^/]+
         - name: tag
+          description: Required. The tag name to delete.
           in: path
           required: true
           type: string
         - name: deleteRelatedMemos
+          description: Optional. Whether to delete related memos.
           in: query
           required: false
           type: boolean
@@ -2013,8 +2178,8 @@ paths:
       parameters:
         - name: parent
           description: |-
-            The parent, who owns the tags.
-            Format: memos/{id}. Use "memos/-" to rename all tags.
+            Required. The parent, who owns the tags.
+            Format: memos/{memo}. Use "memos/-" to rename all tags.
           in: path
           required: true
           type: string
@@ -2348,17 +2513,17 @@ definitions:
     type: string
     enum:
       - LEVEL_UNSPECIFIED
-      - LEVEL_INFO
-      - LEVEL_WARN
-      - LEVEL_ERROR
+      - INFO
+      - WARN
+      - ERROR
     default: LEVEL_UNSPECIFIED
     description: |-
       Activity levels.
 
        - LEVEL_UNSPECIFIED: Unspecified level.
-       - LEVEL_INFO: Info level.
-       - LEVEL_WARN: Warn level.
-       - LEVEL_ERROR: Error level.
+       - INFO: Info level.
+       - WARN: Warn level.
+       - ERROR: Error level.
   ListNodeKind:
     type: string
     enum:
@@ -2372,8 +2537,13 @@ definitions:
     properties:
       oldTag:
         type: string
+        description: Required. The old tag name to rename.
       newTag:
         type: string
+        description: Required. The new tag name.
+    required:
+      - oldTag
+      - newTag
   MemoServiceSetMemoAttachmentsBody:
     type: object
     properties:
@@ -2382,6 +2552,9 @@ definitions:
         items:
           type: object
           $ref: '#/definitions/v1Attachment'
+        description: Required. The attachments to set for the memo.
+    required:
+      - attachments
   MemoServiceSetMemoRelationsBody:
     type: object
     properties:
@@ -2390,11 +2563,17 @@ definitions:
         items:
           type: object
           $ref: '#/definitions/v1MemoRelation'
+        description: Required. The relations to set for the memo.
+    required:
+      - relations
   MemoServiceUpsertMemoReactionBody:
     type: object
     properties:
       reaction:
         $ref: '#/definitions/v1Reaction'
+        description: Required. The reaction to upsert.
+    required:
+      - reaction
   TableNodeRow:
     type: object
     properties:
@@ -2587,86 +2766,108 @@ definitions:
     properties:
       placeholder:
         type: string
+        description: A placeholder text for the location.
       latitude:
         type: number
         format: double
+        description: The latitude of the location.
       longitude:
         type: number
         format: double
+        description: The longitude of the location.
   apiv1Memo:
     type: object
     properties:
       name:
         type: string
         description: |-
-          The name of the memo.
+          The resource name of the memo.
           Format: memos/{memo}, memo is the user defined id or uuid.
-        readOnly: true
       state:
         $ref: '#/definitions/v1State'
+        description: The state of the memo.
       creator:
         type: string
         title: |-
           The name of the creator.
           Format: users/{user}
+        readOnly: true
       createTime:
         type: string
         format: date-time
+        description: Output only. The creation timestamp.
+        readOnly: true
       updateTime:
         type: string
         format: date-time
+        description: Output only. The last update timestamp.
+        readOnly: true
       displayTime:
         type: string
         format: date-time
+        description: The display timestamp of the memo.
       content:
         type: string
+        description: Required. The content of the memo in Markdown format.
       nodes:
         type: array
         items:
           type: object
           $ref: '#/definitions/v1Node'
+        description: Output only. The parsed nodes from the content.
         readOnly: true
       visibility:
         $ref: '#/definitions/v1Visibility'
+        description: The visibility of the memo.
       tags:
         type: array
         items:
           type: string
+        description: Output only. The tags extracted from the content.
         readOnly: true
       pinned:
         type: boolean
+        description: Whether the memo is pinned.
       attachments:
         type: array
         items:
           type: object
           $ref: '#/definitions/v1Attachment'
+        description: Optional. The attachments of the memo.
       relations:
         type: array
         items:
           type: object
           $ref: '#/definitions/v1MemoRelation'
+        description: Optional. The relations of the memo.
       reactions:
         type: array
         items:
           type: object
           $ref: '#/definitions/v1Reaction'
+        description: Output only. The reactions to the memo.
         readOnly: true
       property:
         $ref: '#/definitions/v1MemoProperty'
+        description: Output only. The computed properties of the memo.
         readOnly: true
       parent:
         type: string
         title: |-
-          The name of the parent memo.
-          Format: memos/{id}
+          Output only. The name of the parent memo.
+          Format: memos/{memo}
         readOnly: true
       snippet:
         type: string
-        description: The snippet of the memo content. Plain text only.
+        description: Output only. The snippet of the memo content. Plain text only.
         readOnly: true
       location:
         $ref: '#/definitions/apiv1Location'
-        description: The location of the memo.
+        description: Optional. The location of the memo.
+    required:
+      - state
+      - content
+      - visibility
   apiv1OAuth2Config:
     type: object
     properties:
@@ -3017,15 +3218,15 @@ definitions:
     type: string
     enum:
       - TYPE_UNSPECIFIED
-      - TYPE_MEMO_COMMENT
-      - TYPE_VERSION_UPDATE
+      - MEMO_COMMENT
+      - VERSION_UPDATE
     default: TYPE_UNSPECIFIED
     description: |-
       Activity types.
 
        - TYPE_UNSPECIFIED: Unspecified type.
-       - TYPE_MEMO_COMMENT: Memo comment activity.
-       - TYPE_VERSION_UPDATE: Version update activity.
+       - MEMO_COMMENT: Memo comment activity.
+       - VERSION_UPDATE: Version update activity.
   v1Attachment:
     type: object
     properties:
@@ -3109,20 +3310,29 @@ definitions:
     properties:
       content:
         type: string
-  v1Direction:
-    type: string
-    enum:
-      - DIRECTION_UNSPECIFIED
-      - ASC
-      - DESC
-    default: DIRECTION_UNSPECIFIED
+  v1CreateSessionRequest:
+    type: object
+    properties:
+      passwordCredentials:
+        $ref: '#/definitions/v1PasswordCredentials'
+        description: Username and password authentication method.
+      ssoCredentials:
+        $ref: '#/definitions/v1SSOCredentials'
+        description: SSO provider authentication method.
+      neverExpire:
+        type: boolean
+        description: |-
+          Whether the session should never expire.
+          Optional field that defaults to false for security.
   v1EmbeddedContentNode:
     type: object
     properties:
       resourceName:
         type: string
+        description: The resource name of the embedded content.
       params:
         type: string
+        description: Additional parameters for the embedded content.
   v1EscapingCharacterNode:
     type: object
     properties:
@@ -3170,25 +3380,37 @@ definitions:
     properties:
       name:
         type: string
-        description: |-
-          The name of the inbox.
-          Format: inboxes/{id}, id is the system generated auto-incremented id.
+        title: |-
+          The resource name of the inbox.
+          Format: inboxes/{inbox}
       sender:
         type: string
-        title: 'Format: users/{user}'
+        title: |-
+          The sender of the inbox notification.
+          Format: users/{user}
+        readOnly: true
       receiver:
         type: string
-        title: 'Format: users/{user}'
+        title: |-
+          The receiver of the inbox notification.
+          Format: users/{user}
+        readOnly: true
       status:
         $ref: '#/definitions/v1InboxStatus'
+        description: The status of the inbox notification.
       createTime:
         type: string
         format: date-time
+        description: Output only. The creation timestamp.
+        readOnly: true
       type:
         $ref: '#/definitions/v1InboxType'
+        description: The type of the inbox notification.
+        readOnly: true
       activityId:
         type: integer
         format: int32
+        description: Optional. The activity ID associated with this inbox notification.
   v1InboxStatus:
     type: string
     enum:
@@ -3196,6 +3418,12 @@ definitions:
       - UNREAD
       - ARCHIVED
     default: STATUS_UNSPECIFIED
+    description: |-
+      Status enumeration for inbox notifications.
+
+       - STATUS_UNSPECIFIED: Unspecified status.
+       - UNREAD: The notification is unread.
+       - ARCHIVED: The notification is archived.
   v1InboxType:
     type: string
     enum:
@@ -3203,6 +3431,12 @@ definitions:
       - MEMO_COMMENT
       - VERSION_UPDATE
     default: TYPE_UNSPECIFIED
+    description: |-
+      Type enumeration for inbox notifications.
+
+       - TYPE_UNSPECIFIED: Unspecified type.
+       - MEMO_COMMENT: Memo comment notification.
+       - VERSION_UPDATE: Version update notification.
   v1ItalicNode:
     type: object
     properties:
@@ -3220,10 +3454,13 @@ definitions:
     properties:
       title:
         type: string
+        description: The title of the linked page.
       description:
         type: string
+        description: The description of the linked page.
       image:
         type: string
+        description: The URL of the preview image for the linked page.
   v1LinkNode:
     type: object
     properties:
@@ -3303,11 +3540,16 @@ definitions:
         items:
           type: object
           $ref: '#/definitions/v1Inbox'
+        description: The list of inboxes.
       nextPageToken:
         type: string
         description: |-
-          A token, which can be sent as `page_token` to retrieve the next page.
+          A token that can be sent as `page_token` to retrieve the next page.
           If this field is omitted, there are no subsequent pages.
+      totalSize:
+        type: integer
+        format: int32
+        description: The total count of inboxes (may be approximate).
   v1ListMemoAttachmentsResponse:
     type: object
     properties:
@@ -3316,6 +3558,14 @@ definitions:
         items:
           type: object
           $ref: '#/definitions/v1Attachment'
+        description: The list of attachments.
+      nextPageToken:
+        type: string
+        description: A token for the next page of results.
+      totalSize:
+        type: integer
+        format: int32
+        description: The total count of attachments.
   v1ListMemoCommentsResponse:
     type: object
     properties:
@@ -3324,6 +3574,14 @@ definitions:
         items:
           type: object
           $ref: '#/definitions/apiv1Memo'
+        description: The list of comment memos.
+      nextPageToken:
+        type: string
+        description: A token for the next page of results.
+      totalSize:
+        type: integer
+        format: int32
+        description: The total count of comments.
   v1ListMemoReactionsResponse:
     type: object
     properties:
@@ -3332,6 +3590,14 @@ definitions:
         items:
           type: object
           $ref: '#/definitions/v1Reaction'
+        description: The list of reactions.
+      nextPageToken:
+        type: string
+        description: A token for the next page of results.
+      totalSize:
+        type: integer
+        format: int32
+        description: The total count of reactions.
   v1ListMemoRelationsResponse:
     type: object
     properties:
@@ -3340,6 +3606,14 @@ definitions:
         items:
           type: object
           $ref: '#/definitions/v1MemoRelation'
+        description: The list of relations.
+      nextPageToken:
+        type: string
+        description: A token for the next page of results.
+      totalSize:
+        type: integer
+        format: int32
+        description: The total count of relations.
   v1ListMemosResponse:
     type: object
     properties:
@@ -3348,11 +3622,16 @@ definitions:
         items:
           type: object
           $ref: '#/definitions/apiv1Memo'
+        description: The list of memos.
       nextPageToken:
         type: string
         description: |-
-          A token, which can be sent as `page_token` to retrieve the next page.
+          A token that can be sent as `page_token` to retrieve the next page.
           If this field is omitted, there are no subsequent pages.
+      totalSize:
+        type: integer
+        format: int32
+        description: The total count of memos (may be approximate).
   v1ListNode:
     type: object
     properties:
@@ -3455,29 +3734,41 @@ definitions:
         type: boolean
       hasIncompleteTasks:
         type: boolean
+    description: Computed properties of a memo.
   v1MemoRelation:
     type: object
     properties:
       memo:
         $ref: '#/definitions/v1MemoRelationMemo'
+        description: The memo in the relation.
       relatedMemo:
         $ref: '#/definitions/v1MemoRelationMemo'
+        description: The related memo.
       type:
         $ref: '#/definitions/v1MemoRelationType'
+    required:
+      - memo
+      - relatedMemo
+      - type
   v1MemoRelationMemo:
     type: object
     properties:
       name:
         type: string
         title: |-
-          The name of the memo.
-          Format: memos/{id}
+          The resource name of the memo.
+          Format: memos/{memo}
       uid:
         type: string
+        description: Output only. The unique identifier of the memo.
+        readOnly: true
       snippet:
         type: string
-        description: The snippet of the memo content. Plain text only.
+        description: Output only. The snippet of the memo content. Plain text only.
         readOnly: true
+    description: Memo reference in relations.
+    required:
+      - name
   v1MemoRelationType:
     type: string
     enum:
@@ -3485,6 +3776,7 @@ definitions:
       - REFERENCE
       - COMMENT
     default: TYPE_UNSPECIFIED
+    description: The type of the relation.
   v1Node:
     type: object
     properties:
@@ -3619,6 +3911,9 @@ definitions:
     properties:
       markdown:
         type: string
+        description: The markdown content to parse.
+    required:
+      - markdown
   v1ParseMarkdownResponse:
     type: object
     properties:
@@ -3627,40 +3922,84 @@ definitions:
         items:
           type: object
           $ref: '#/definitions/v1Node'
+        description: The parsed markdown nodes.
   v1PasswordCredentials:
     type: object
     properties:
       username:
         type: string
-        description: The username to sign in with.
+        description: |-
+          The username to sign in with.
+          Required field for password-based authentication.
       password:
         type: string
-        description: The password to sign in with.
+        description: |-
+          The password to sign in with.
+          Required field for password-based authentication.
+    required:
+      - username
+      - password
   v1Reaction:
     type: object
     properties:
-      id:
-        type: integer
-        format: int32
+      name:
+        type: string
+        title: |-
+          The resource name of the reaction.
+          Format: reactions/{reaction}
+        readOnly: true
+      uid:
+        type: string
+        description: Output only. The system generated unique identifier.
+        readOnly: true
       creator:
         type: string
         title: |-
-          The name of the creator.
+          The resource name of the creator.
           Format: users/{user}
+        readOnly: true
       contentId:
         type: string
-        description: |-
-          The content identifier.
-          For memo, it should be the `Memo.name`.
+        title: |-
+          The resource name of the content.
+          For memo reactions, this should be the memo's resource name.
+          Format: memos/{memo}
       reactionType:
         type: string
+        description: "Required. The type of reaction (e.g., \"\U0001F44D\", \"❤️\", \"\U0001F604\")."
+      createTime:
+        type: string
+        format: date-time
+        description: Output only. The creation timestamp.
+        readOnly: true
+    required:
+      - contentId
+      - reactionType
   v1ReferencedContentNode:
     type: object
     properties:
       resourceName:
         type: string
+        description: The resource name of the referenced content.
       params:
         type: string
+        description: Additional parameters for the referenced content.
+  v1RegisterUserRequest:
+    type: object
+    properties:
+      username:
+        type: string
+        description: |-
+          The username to sign up with.
+          Required field that must be unique across the system.
+      password:
+        type: string
+        description: |-
+          The password to sign up with.
+          Required field that should meet security requirements.
+    required:
+      - username
+      - password
   v1RestoreMarkdownNodesRequest:
     type: object
     properties:
@@ -3669,24 +4008,38 @@ definitions:
         items:
           type: object
           $ref: '#/definitions/v1Node'
+        description: The nodes to restore to markdown content.
+    required:
+      - nodes
   v1RestoreMarkdownNodesResponse:
     type: object
     properties:
       markdown:
         type: string
+        description: The restored markdown content.
   v1SSOCredentials:
     type: object
     properties:
       idpId:
         type: integer
         format: int32
-        description: The ID of the SSO provider.
+        description: |-
+          The ID of the SSO provider.
+          Required field to identify the SSO provider.
       code:
         type: string
-        description: The code to sign in with.
+        description: |-
+          The authorization code from the SSO provider.
+          Required field for completing the SSO flow.
       redirectUri:
         type: string
-        description: The redirect URI.
+        description: |-
+          The redirect URI used in the SSO flow.
+          Required field for security validation.
+    required:
+      - idpId
+      - code
+      - redirectUri
   v1SearchUsersResponse:
     type: object
     properties:
@@ -3728,11 +4081,15 @@ definitions:
         items:
           type: object
           $ref: '#/definitions/v1Node'
+        description: The nodes to stringify to plain text.
+    required:
+      - nodes
   v1StringifyMarkdownNodesResponse:
     type: object
     properties:
       plainText:
         type: string
+        description: The plain text content.
   v1SubscriptNode:
     type: object
     properties:
