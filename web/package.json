@@ -60,6 +60,7 @@
     "@types/react-dom": "^18.3.7",
     "@types/textarea-caret": "^3.0.4",
     "@types/uuid": "^10.0.0",
+    "@vitejs/plugin-basic-ssl": "^2.0.0",
     "@vitejs/plugin-legacy": "^6.1.1",
     "@vitejs/plugin-react": "^4.5.0",
     "autoprefixer": "^10.4.21",
@@ -75,7 +76,8 @@
     "terser": "^5.40.0",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.33.0",
-    "vite": "^6.3.5"
+    "vite": "^6.3.5",
+    "vite-plugin-pwa": "^1.0.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

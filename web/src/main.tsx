@@ -27,4 +27,10 @@ const Main = observer(() => (
   const container = document.getElementById("root");
   const root = createRoot(container as HTMLElement);
   root.render(<Main />);
+
+  // 注册PWA Service Worker（由vite-plugin-pwa自动处理）
+  if ("serviceWorker" in navigator) {
+    // vite-plugin-pwa会自动注入Service Worker注册代码
+    console.log("PWA Service Worker 将由 vite-plugin-pwa 自动注册");
+  }
 })();
