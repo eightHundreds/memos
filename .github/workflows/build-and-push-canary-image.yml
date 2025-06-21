@@ -2,7 +2,7 @@ name: Build and Push Canary Image
 
 on:
   push:
-    branches: [main]
+    branches: [dev]
 
 env:
   DOCKER_PLATFORMS: |
