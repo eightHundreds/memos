@@ -86,10 +86,8 @@ export class AmapStrategy implements MapStrategy {
   readonly name = "amap";
   readonly displayName = "高德地图";
 
-  private apiKey: string;
-
-  constructor(apiKey: string = "") {
-    this.apiKey = apiKey;
+  constructor() {
+    // 不再需要API key，使用后端代理
   }
 
   getTileConfig(): MapTileConfig {
@@ -114,40 +112,16 @@ export class AmapStrategy implements MapStrategy {
 
   async reverseGeocode(lng: number, lat: number): Promise<GeocodeResult> {
     try {
-      // 转换为 GCJ02 进行查询
-      const [gcjLng, gcjLat] = this.transformForDisplay(lng, lat);
-
-      // 如果有API key，优先使用高德API
-      if (this.apiKey && this.apiKey !== "YOUR_AMAP_KEY") {
-        const response = await fetch(
-          `https://restapi.amap.com/v3/geocode/regeo?location=${gcjLng},${gcjLat}&output=json&key=${this.apiKey}`,
-        );
-        const data = await response.json();
-
-        if (data && data.status === "1" && data.regeocode && data.regeocode.formatted_address) {
-          return {
-            address: data.regeocode.formatted_address,
-            success: true,
-          };
-        }
-      }
-
-      // 备用方案：使用 OpenStreetMap API
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?lat=${gcjLat}&lon=${gcjLng}&format=json&accept-language=zh-CN`,
-      );
+      // 使用后端代理接口进行逆地理编码
+      const response = await fetch(`/api/v1/geocode/reverse?lng=${lng}&lat=${lat}`);
       const data = await response.json();
 
-      if (data && data.display_name) {
-        return {
-          address: data.display_name,
-          success: true,
-        };
-      }
-
-      return { address: "", success: false };
+      return {
+        address: data.address || "",
+        success: data.success || false,
+      };
     } catch (error) {
-      console.error("高德地图逆地理编码失败:", error);
+      console.error("地理编码失败:", error);
       return { address: "", success: false };
     }
   }
@@ -184,7 +158,7 @@ export class MapStrategyFactory {
 
 // 注册默认策略
 MapStrategyFactory.register("openstreetmap", () => new OpenStreetMapStrategy());
-MapStrategyFactory.register("amap", () => new AmapStrategy(import.meta.env.VITE_AMAP_KEY || ""));
+MapStrategyFactory.register("amap", () => new AmapStrategy());
 
 // 默认策略配置
 export const DEFAULT_MAP_STRATEGY = "amap"; // 默认使用高德地图

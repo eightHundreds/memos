@@ -128,6 +128,9 @@ func (s *APIV1Service) RegisterGateway(ctx context.Context, echoServer *echo.Ech
 	gwGroup.Any("/api/v1/*", handler)
 	gwGroup.Any("/file/*", handler)
 
+	// 添加地理编码代理接口
+	echoServer.GET("/api/v1/geocode/reverse", s.ReverseGeocode)
+
 	// GRPC web proxy.
 	options := []grpcweb.Option{
 		grpcweb.WithCorsForRegisteredEndpointsOnly(false),

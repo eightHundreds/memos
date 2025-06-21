@@ -4,7 +4,6 @@ import { Outlet, useLocation, useSearchParams } from "react-router-dom";
 import usePrevious from "react-use/lib/usePrevious";
 import Navigation from "@/components/Navigation";
 import NetworkStatus from "@/components/NetworkStatus";
-import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import useCurrentUser from "@/hooks/useCurrentUser";
 import useResponsiveWidth from "@/hooks/useResponsiveWidth";
 import Loading from "@/pages/Loading";
@@ -63,7 +62,6 @@ const RootLayout = observer(() => {
         </Suspense>
       </main>
       <NetworkStatus />
-      <PWAInstallPrompt />
     </div>
   );
 });

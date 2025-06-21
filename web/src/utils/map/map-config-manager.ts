@@ -15,8 +15,18 @@ class MapConfigManager {
   private config: MapConfig;
 
   constructor() {
-    // 基于环境变量确定地图策略
-    const mapProvider = import.meta.env.VITE_MAP_PROVIDER || "amap";
+    // 基于运行时配置或环境变量确定地图策略
+    // 尝试从全局配置或环境变量读取 provider
+    const windowProvider = window.__MEMOS_CONFIG__?.mapProvider;
+    const envProvider = import.meta.env.VITE_MAP_PROVIDER;
+
+    function isValidProvider(p?: string): p is string {
+      return !!p && !/\{\{.*\}\}/.test(p);
+    }
+
+    const mapProvider = (
+      isValidProvider(windowProvider) ? windowProvider : isValidProvider(envProvider) ? envProvider : "openstreetmap"
+    ).toLowerCase();
 
     this.strategy = this.createStrategy(mapProvider);
     this.config = {
@@ -31,14 +41,12 @@ class MapConfigManager {
   private createStrategy(provider: string): MapStrategy {
     switch (provider.toLowerCase()) {
       case "openstreetmap":
-      case "osm":
         console.log("Using OpenStreetMap strategy");
         return new OpenStreetMapStrategy();
 
       case "amap":
-      case "gaode":
         console.log("Using Amap strategy");
-        return new AmapStrategy(import.meta.env.VITE_AMAP_KEY || "");
+        return new AmapStrategy();
 
       default:
         console.warn(`Unknown map provider: ${provider}, falling back to OpenStreetMap`);
