@@ -7,6 +7,7 @@ import LeafletMap from "@/components/LeafletMap";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/Popover";
 import { Location } from "@/types/proto/api/v1/memo_service";
 import { useTranslate } from "@/utils/i18n";
+import { getMapConfigManager } from "@/utils/map/map-config-manager";
 
 interface Props {
   location?: Location;
@@ -14,7 +15,7 @@ interface Props {
 }
 
 interface State {
-  initilized: boolean;
+  initialized: boolean;
   placeholder: string;
   position?: LatLng;
 }
@@ -22,7 +23,7 @@ interface State {
 const LocationSelector = (props: Props) => {
   const t = useTranslate();
   const [state, setState] = useState<State>({
-    initilized: false,
+    initialized: false,
     placeholder: props.location?.placeholder || "",
     position: props.location ? new LatLng(props.location.latitude, props.location.longitude) : undefined,
   });
@@ -39,7 +40,7 @@ const LocationSelector = (props: Props) => {
   useEffect(() => {
     if (popoverOpen && !props.location) {
       const handleError = (error: any, errorMessage: string) => {
-        setState({ ...state, initilized: true });
+        setState({ ...state, initialized: true });
         toast.error(errorMessage);
         console.error(error);
       };
@@ -47,9 +48,22 @@ const LocationSelector = (props: Props) => {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           (position) => {
-            const lat = position.coords.latitude;
-            const lng = position.coords.longitude;
-            setState({ ...state, position: new LatLng(lat, lng), initilized: true });
+            const lat = position.coords.latitude; // WGS84 坐标
+            const lng = position.coords.longitude; // WGS84 坐标
+            const newPosition = new LatLng(lat, lng);
+
+            // 浏览器返回的是WGS84坐标，直接使用，【无需转换】
+            setState((prevState) => ({
+              ...prevState,
+              position: newPosition,
+              initialized: true,
+              placeholder: "", // 清空placeholder，准备获取新的地址
+            }));
+
+            // 获取地址信息
+            setTimeout(() => {
+              fetchReverseGeocoding(newPosition);
+            }, 100);
           },
           (error) => {
             handleError(error, "Failed to get current position");
@@ -61,28 +75,30 @@ const LocationSelector = (props: Props) => {
     }
   }, [popoverOpen]);
 
-  useEffect(() => {
-    if (!state.position) {
-      setState({ ...state, placeholder: "" });
-      return;
+  // 【转换边界】分离地理编码逻辑，只在用户新选择位置时触发
+  const fetchReverseGeocoding = async (position: LatLng) => {
+    try {
+      // 使用当前地图策略进行逆地理编码
+      const strategy = getMapConfigManager().getStrategy();
+      const result = await strategy.reverseGeocode(position.lng, position.lat);
+
+      if (result.success && result.address) {
+        setState((prevState) => ({ ...prevState, placeholder: result.address }));
+      } else {
+        // 如果地理编码失败，可以显示一个默认提示
+        console.warn("逆地理编码未返回有效地址");
+      }
+    } catch (error) {
+      toast.error("获取地址信息失败");
+      console.error("逆地理编码失败:", error);
     }
+  };
 
-    // Fetch reverse geocoding data.
-    fetch(`https://nominatim.openstreetmap.org/reverse?lat=${state.position.lat}&lon=${state.position.lng}&format=json`)
-      .then((response) => response.json())
-      .then((data) => {
-        if (data && data.display_name) {
-          setState({ ...state, placeholder: data.display_name });
-        }
-      })
-      .catch((error) => {
-        toast.error("Failed to fetch reverse geocoding data");
-        console.error("Failed to fetch reverse geocoding data:", error);
-      });
-  }, [state.position]);
-
+  // 只在用户通过地图选择位置时触发地理编码
   const onPositionChanged = (position: LatLng) => {
-    setState({ ...state, position });
+    // position 参数已经是 WGS84 格式，直接存储
+    setState((prevState) => ({ ...prevState, position, placeholder: "" }));
+    fetchReverseGeocoding(position);
   };
 
   const removeLocation = (e: React.MouseEvent) => {
@@ -106,7 +122,7 @@ const LocationSelector = (props: Props) => {
       </PopoverTrigger>
       <PopoverContent align="center">
         <div className="min-w-80 sm:w-128 flex flex-col justify-start items-start">
-          <LeafletMap key={JSON.stringify(state.initilized)} latlng={state.position} onChange={onPositionChanged} />
+          <LeafletMap key={JSON.stringify(state.initialized)} latlng={state.position} onChange={onPositionChanged} />
           <div className="mt-2 w-full flex flex-row justify-between items-center gap-2">
             <div className="flex flex-row items-center justify-start gap-2">
               <Input
@@ -129,6 +145,7 @@ const LocationSelector = (props: Props) => {
               color="primary"
               size="sm"
               onClick={() => {
+                // 提交时传递 WGS84 坐标给父组件，用于存储
                 props.onChange(
                   Location.fromPartial({
                     placeholder: state.placeholder,

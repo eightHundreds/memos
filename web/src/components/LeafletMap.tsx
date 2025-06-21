@@ -3,6 +3,7 @@ import { MapPinIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import ReactDOMServer from "react-dom/server";
 import { MapContainer, Marker, TileLayer, useMapEvents } from "react-leaflet";
+import { getMapConfigManager } from "@/utils/map/map-config-manager";
 
 const markerIcon = new DivIcon({
   className: "relative border-none",
@@ -16,7 +17,11 @@ interface MarkerProps {
 }
 
 const LocationMarker = (props: MarkerProps) => {
-  const [position, setPosition] = useState(props.position);
+  // 获取地图策略
+  const strategy = getMapConfigManager().getStrategy();
+
+  // 内部状态统一使用 WGS84 坐标系，只在显示时根据策略转换
+  const [position, setPosition] = useState<LatLng | undefined>(props.position);
 
   const map = useMapEvents({
     click(e) {
@@ -24,10 +29,15 @@ const LocationMarker = (props: MarkerProps) => {
         return;
       }
 
-      setPosition(e.latlng);
+      // 【转换边界】根据地图策略转换点击坐标为标准坐标
+      const clickCoords = e.latlng;
+      const [wgsLng, wgsLat] = strategy.transformFromMap(clickCoords.lng, clickCoords.lat);
+      const wgsPosition = new LatLng(wgsLat, wgsLng);
+
+      // 内部状态和对外传递都使用 WGS84
+      setPosition(wgsPosition);
       map.locate();
-      // Call the parent onChange function.
-      props.onChange(e.latlng);
+      props.onChange(wgsPosition);
     },
     locationfound() {},
   });
@@ -35,9 +45,22 @@ const LocationMarker = (props: MarkerProps) => {
   useEffect(() => {
     map.attributionControl.setPrefix("");
     map.locate();
-  }, []);
+  }, [map]);
 
-  return position === undefined ? null : <Marker position={position} icon={markerIcon}></Marker>;
+  // props.position 传入的已经是 WGS84，直接使用
+  useEffect(() => {
+    setPosition(props.position);
+  }, [props.position]);
+
+  // 【转换边界】根据地图策略转换为显示坐标
+  const displayPosition = position
+    ? (() => {
+        const [displayLng, displayLat] = strategy.transformForDisplay(position.lng, position.lat);
+        return new LatLng(displayLat, displayLng);
+      })()
+    : undefined;
+
+  return displayPosition === undefined ? null : <Marker position={displayPosition} icon={markerIcon}></Marker>;
 };
 
 interface MapProps {
@@ -46,13 +69,33 @@ interface MapProps {
   onChange?: (position: LatLng) => void;
 }
 
-const DEFAULT_CENTER_LAT_LNG = new LatLng(48.8584, 2.2945);
-
 const LeafletMap = (props: MapProps) => {
-  const position = props.latlng || DEFAULT_CENTER_LAT_LNG;
+  // 获取当前地图配置和策略
+  const configManager = getMapConfigManager();
+  const config = configManager.getConfig();
+  const strategy = configManager.getStrategy();
+
+  // 默认中心点坐标（从配置获取，WGS84坐标系）
+  const defaultCenter = new LatLng(config.center.latitude, config.center.longitude);
+  const position = props.latlng || defaultCenter;
+
+  // 【转换边界】根据地图策略转换中心点为显示坐标
+  const [displayLng, displayLat] = strategy.transformForDisplay(position.lng, position.lat);
+  const mapCenter = new LatLng(displayLat, displayLng);
+
+  // 获取瓦片配置
+  const tileConfig = strategy.getTileConfig();
+
   return (
-    <MapContainer className="w-full h-72" center={position} zoom={13} scrollWheelZoom={false}>
-      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+    <MapContainer className="w-full h-72" center={mapCenter} zoom={config.zoom} scrollWheelZoom={false}>
+      <TileLayer
+        url={tileConfig.url}
+        subdomains={tileConfig.subdomains}
+        minZoom={tileConfig.minZoom}
+        maxZoom={tileConfig.maxZoom}
+        attribution={tileConfig.attribution}
+      />
+      {/* 传递 WGS84 坐标给 LocationMarker */}
       <LocationMarker position={position} readonly={props.readonly} onChange={props.onChange ? props.onChange : () => {}} />
     </MapContainer>
   );
