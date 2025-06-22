@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { workspaceSettingNamePrefix } from "@/store/common";
 import { workspaceStore } from "@/store/v2";
 import { WorkspaceSettingKey } from "@/store/v2/workspace";
-import { WorkspaceMapRelatedSetting_MapProvider } from "@/types/proto/store/workspace_setting";
+import { WorkspaceMapRelatedSetting_MapProvider } from "@/types/proto/api/v1/workspace_setting_service";
 import { useTranslate } from "@/utils/i18n";
 
 const MapConfigSection = observer(() => {
@@ -86,9 +86,7 @@ const MapConfigSection = observer(() => {
               onChange={(e) => setMapSetting((prev) => ({ ...prev, amapApiKey: e.target.value }))}
               type="password"
             />
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {t("setting.map-config-section.amap-api-key-description")}
-            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{t("setting.map-config-section.amap-api-key-description")}</p>
           </div>
         )}
 

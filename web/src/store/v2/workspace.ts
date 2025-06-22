@@ -3,7 +3,7 @@ import { makeAutoObservable } from "mobx";
 import { workspaceServiceClient, workspaceSettingServiceClient } from "@/grpcweb";
 import { WorkspaceProfile } from "@/types/proto/api/v1/workspace_service";
 import { WorkspaceGeneralSetting, WorkspaceMemoRelatedSetting, WorkspaceSetting } from "@/types/proto/api/v1/workspace_setting_service";
-import { WorkspaceMapRelatedSetting } from "@/types/proto/store/workspace_setting";
+import { WorkspaceMapRelatedSetting } from "@/types/proto/api/v1/workspace_setting_service";
 import { isValidateLocale } from "@/utils/i18n";
 import { workspaceSettingNamePrefix } from "../common";
 

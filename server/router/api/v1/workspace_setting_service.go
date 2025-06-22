@@ -99,7 +99,7 @@ func convertWorkspaceSettingFromStore(setting *storepb.WorkspaceSetting) *v1pb.W
 		}
 	case *storepb.WorkspaceSetting_MapRelatedSetting:
 		workspaceSetting.Value = &v1pb.WorkspaceSetting_MapRelatedSetting{
-			MapRelatedSetting: setting.GetMapRelatedSetting(),
+			MapRelatedSetting: convertWorkspaceMapRelatedSettingFromStore(setting.GetMapRelatedSetting()),
 		}
 	}
 	return workspaceSetting
@@ -128,7 +128,7 @@ func convertWorkspaceSettingToStore(setting *v1pb.WorkspaceSetting) *storepb.Wor
 		}
 	case storepb.WorkspaceSettingKey_MAP_RELATED:
 		workspaceSetting.Value = &storepb.WorkspaceSetting_MapRelatedSetting{
-			MapRelatedSetting: setting.GetMapRelatedSetting(),
+			MapRelatedSetting: convertWorkspaceMapRelatedSettingToStore(setting.GetMapRelatedSetting()),
 		}
 	}
 	return workspaceSetting
@@ -261,5 +261,47 @@ func convertWorkspaceMemoRelatedSettingToStore(setting *v1pb.WorkspaceMemoRelate
 		DisableMarkdownShortcuts: setting.DisableMarkdownShortcuts,
 		EnableBlurNsfwContent:    setting.EnableBlurNsfwContent,
 		NsfwTags:                 setting.NsfwTags,
+	}
+}
+
+func convertWorkspaceMapRelatedSettingFromStore(setting *storepb.WorkspaceMapRelatedSetting) *v1pb.WorkspaceMapRelatedSetting {
+	if setting == nil {
+		return nil
+	}
+	var mapProvider v1pb.WorkspaceMapRelatedSetting_MapProvider
+	switch setting.MapProvider {
+	case storepb.WorkspaceMapRelatedSetting_MAP_PROVIDER_UNSPECIFIED:
+		mapProvider = v1pb.WorkspaceMapRelatedSetting_MAP_PROVIDER_UNSPECIFIED
+	case storepb.WorkspaceMapRelatedSetting_AMAP:
+		mapProvider = v1pb.WorkspaceMapRelatedSetting_AMAP
+	case storepb.WorkspaceMapRelatedSetting_OSM:
+		mapProvider = v1pb.WorkspaceMapRelatedSetting_OSM
+	default:
+		mapProvider = v1pb.WorkspaceMapRelatedSetting_MAP_PROVIDER_UNSPECIFIED
+	}
+	return &v1pb.WorkspaceMapRelatedSetting{
+		MapProvider: mapProvider,
+		AmapApiKey:  setting.AmapApiKey,
+	}
+}
+
+func convertWorkspaceMapRelatedSettingToStore(setting *v1pb.WorkspaceMapRelatedSetting) *storepb.WorkspaceMapRelatedSetting {
+	if setting == nil {
+		return nil
+	}
+	var mapProvider storepb.WorkspaceMapRelatedSetting_MapProvider
+	switch setting.MapProvider {
+	case v1pb.WorkspaceMapRelatedSetting_MAP_PROVIDER_UNSPECIFIED:
+		mapProvider = storepb.WorkspaceMapRelatedSetting_MAP_PROVIDER_UNSPECIFIED
+	case v1pb.WorkspaceMapRelatedSetting_AMAP:
+		mapProvider = storepb.WorkspaceMapRelatedSetting_AMAP
+	case v1pb.WorkspaceMapRelatedSetting_OSM:
+		mapProvider = storepb.WorkspaceMapRelatedSetting_OSM
+	default:
+		mapProvider = storepb.WorkspaceMapRelatedSetting_MAP_PROVIDER_UNSPECIFIED
+	}
+	return &storepb.WorkspaceMapRelatedSetting{
+		MapProvider: mapProvider,
+		AmapApiKey:  setting.AmapApiKey,
 	}
 }

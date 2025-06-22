@@ -6,7 +6,6 @@
 
 /* eslint-disable */
 import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
-import { WorkspaceMapRelatedSetting } from "../../store/workspace_setting";
 
 export const protobufPackage = "memos.api.v1";
 
@@ -161,6 +160,54 @@ export interface GetWorkspaceSettingRequest {
 export interface SetWorkspaceSettingRequest {
   /** setting is the setting to update. */
   setting?: WorkspaceSetting | undefined;
+}
+
+export interface WorkspaceMapRelatedSetting {
+  /** map_provider is the map service provider. */
+  mapProvider: WorkspaceMapRelatedSetting_MapProvider;
+  /** amap_api_key is the API key for Amap (高德地图) service. */
+  amapApiKey: string;
+}
+
+export enum WorkspaceMapRelatedSetting_MapProvider {
+  MAP_PROVIDER_UNSPECIFIED = "MAP_PROVIDER_UNSPECIFIED",
+  /** AMAP - AMAP is the AMap provider (高德地图). */
+  AMAP = "AMAP",
+  /** OSM - OSM is the OpenStreetMap provider. */
+  OSM = "OSM",
+  UNRECOGNIZED = "UNRECOGNIZED",
+}
+
+export function workspaceMapRelatedSetting_MapProviderFromJSON(object: any): WorkspaceMapRelatedSetting_MapProvider {
+  switch (object) {
+    case 0:
+    case "MAP_PROVIDER_UNSPECIFIED":
+      return WorkspaceMapRelatedSetting_MapProvider.MAP_PROVIDER_UNSPECIFIED;
+    case 1:
+    case "AMAP":
+      return WorkspaceMapRelatedSetting_MapProvider.AMAP;
+    case 2:
+    case "OSM":
+      return WorkspaceMapRelatedSetting_MapProvider.OSM;
+    case -1:
+    case "UNRECOGNIZED":
+    default:
+      return WorkspaceMapRelatedSetting_MapProvider.UNRECOGNIZED;
+  }
+}
+
+export function workspaceMapRelatedSetting_MapProviderToNumber(object: WorkspaceMapRelatedSetting_MapProvider): number {
+  switch (object) {
+    case WorkspaceMapRelatedSetting_MapProvider.MAP_PROVIDER_UNSPECIFIED:
+      return 0;
+    case WorkspaceMapRelatedSetting_MapProvider.AMAP:
+      return 1;
+    case WorkspaceMapRelatedSetting_MapProvider.OSM:
+      return 2;
+    case WorkspaceMapRelatedSetting_MapProvider.UNRECOGNIZED:
+    default:
+      return -1;
+  }
 }
 
 function createBaseWorkspaceSetting(): WorkspaceSetting {
@@ -956,6 +1003,64 @@ export const SetWorkspaceSettingRequest: MessageFns<SetWorkspaceSettingRequest> 
     message.setting = (object.setting !== undefined && object.setting !== null)
       ? WorkspaceSetting.fromPartial(object.setting)
       : undefined;
+    return message;
+  },
+};
+
+function createBaseWorkspaceMapRelatedSetting(): WorkspaceMapRelatedSetting {
+  return { mapProvider: WorkspaceMapRelatedSetting_MapProvider.MAP_PROVIDER_UNSPECIFIED, amapApiKey: "" };
+}
+
+export const WorkspaceMapRelatedSetting: MessageFns<WorkspaceMapRelatedSetting> = {
+  encode(message: WorkspaceMapRelatedSetting, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.mapProvider !== WorkspaceMapRelatedSetting_MapProvider.MAP_PROVIDER_UNSPECIFIED) {
+      writer.uint32(8).int32(workspaceMapRelatedSetting_MapProviderToNumber(message.mapProvider));
+    }
+    if (message.amapApiKey !== "") {
+      writer.uint32(18).string(message.amapApiKey);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): WorkspaceMapRelatedSetting {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseWorkspaceMapRelatedSetting();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.mapProvider = workspaceMapRelatedSetting_MapProviderFromJSON(reader.int32());
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.amapApiKey = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  create(base?: DeepPartial<WorkspaceMapRelatedSetting>): WorkspaceMapRelatedSetting {
+    return WorkspaceMapRelatedSetting.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<WorkspaceMapRelatedSetting>): WorkspaceMapRelatedSetting {
+    const message = createBaseWorkspaceMapRelatedSetting();
+    message.mapProvider = object.mapProvider ?? WorkspaceMapRelatedSetting_MapProvider.MAP_PROVIDER_UNSPECIFIED;
+    message.amapApiKey = object.amapApiKey ?? "";
     return message;
   },
 };

@@ -33,7 +33,7 @@ message WorkspaceSetting {
     WorkspaceGeneralSetting general_setting = 2;
     WorkspaceStorageSetting storage_setting = 3;
     WorkspaceMemoRelatedSetting memo_related_setting = 4;
-    memos.store.WorkspaceMapRelatedSetting map_related_setting = 5;
+    WorkspaceMapRelatedSetting map_related_setting = 5;
   }
 }
 
@@ -131,4 +131,18 @@ message GetWorkspaceSettingRequest {
 message SetWorkspaceSettingRequest {
   // setting is the setting to update.
   WorkspaceSetting setting = 1;
+}
+
+message WorkspaceMapRelatedSetting {
+  enum MapProvider {
+    MAP_PROVIDER_UNSPECIFIED = 0;
+    // AMAP is the AMap provider (高德地图).
+    AMAP = 1;
+    // OSM is the OpenStreetMap provider.
+    OSM = 2;
+  }
+  // map_provider is the map service provider.
+  MapProvider map_provider = 1;
+  // amap_api_key is the API key for Amap (高德地图) service.
+  string amap_api_key = 2;
 }
