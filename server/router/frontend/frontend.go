@@ -29,7 +29,7 @@ func NewFrontendService(profile *profile.Profile, store *store.Store) *FrontendS
 	}
 }
 
-func (fs *FrontendService) Serve(_ context.Context, e *echo.Echo) {
+func (*FrontendService) Serve(_ context.Context, e *echo.Echo) {
 	skipper := func(c echo.Context) bool {
 		// Skip API routes.
 		if util.HasPrefixes(c.Path(), "/api", "/memos.api.v1") {
@@ -47,7 +47,6 @@ func (fs *FrontendService) Serve(_ context.Context, e *echo.Echo) {
 		Skipper:    skipper,
 	}))
 }
-
 
 func getFileSystem(path string) http.FileSystem {
 	fs, err := fs.Sub(embeddedFiles, path)
