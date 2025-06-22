@@ -343,6 +343,16 @@
       "url-suffix-placeholder": "自定义链接后缀，可选",
       "warning-text": "您确定要删除存储服务“{{name}}”吗？（此操作不可逆）"
     },
+    "map-config": "地图配置",
+    "map-config-section": {
+      "map-provider": "地图服务提供商",
+      "amap": "高德地图",
+      "openstreetmap": "OpenStreetMap",
+      "amap-api-key": "高德地图 API Key",
+      "amap-api-key-placeholder": "请输入您的高德地图 API Key",
+      "amap-api-key-description": "从高德地图控制台申请Web服务API密钥",
+      "description": "选择地图服务提供商，影响备忘录位置功能的地图显示"
+    },
     "system": "系统",
     "system-section": {
       "additional-script": "自定义脚本",

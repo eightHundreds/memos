@@ -3,6 +3,7 @@ import { makeAutoObservable } from "mobx";
 import { workspaceServiceClient, workspaceSettingServiceClient } from "@/grpcweb";
 import { WorkspaceProfile } from "@/types/proto/api/v1/workspace_service";
 import { WorkspaceGeneralSetting, WorkspaceMemoRelatedSetting, WorkspaceSetting } from "@/types/proto/api/v1/workspace_setting_service";
+import { WorkspaceMapRelatedSetting } from "@/types/proto/store/workspace_setting";
 import { isValidateLocale } from "@/utils/i18n";
 import { workspaceSettingNamePrefix } from "../common";
 
@@ -15,6 +16,8 @@ export enum WorkspaceSettingKey {
   STORAGE = "STORAGE",
   /** MEMO_RELATED - MEMO_RELATED is the key for memo related settings. */
   MEMO_RELATED = "MEMO_RELATED",
+  /** MAP_RELATED - MAP_RELATED is the key for map related settings. */
+  MAP_RELATED = "MAP_RELATED",
 }
 
 class LocalState {
@@ -34,6 +37,13 @@ class LocalState {
     return (
       this.settings.find((setting) => setting.name === `${workspaceSettingNamePrefix}${WorkspaceSettingKey.MEMO_RELATED}`)
         ?.memoRelatedSetting || WorkspaceMemoRelatedSetting.fromPartial({})
+    );
+  }
+
+  get mapRelatedSetting() {
+    return (
+      this.settings.find((setting) => setting.name === `${workspaceSettingNamePrefix}${WorkspaceSettingKey.MAP_RELATED}`)
+        ?.mapRelatedSetting || WorkspaceMapRelatedSetting.fromPartial({})
     );
   }
 
@@ -90,7 +100,7 @@ const workspaceStore = (() => {
 export const initialWorkspaceStore = async () => {
   const workspaceProfile = await workspaceServiceClient.getWorkspaceProfile({});
   // Prepare workspace settings.
-  for (const key of [WorkspaceSettingKey.GENERAL, WorkspaceSettingKey.MEMO_RELATED]) {
+  for (const key of [WorkspaceSettingKey.GENERAL, WorkspaceSettingKey.MEMO_RELATED, WorkspaceSettingKey.MAP_RELATED]) {
     await workspaceStore.fetchWorkspaceSetting(key);
   }
 

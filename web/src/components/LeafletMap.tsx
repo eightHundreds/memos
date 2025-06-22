@@ -18,14 +18,19 @@ interface MarkerProps {
 
 const LocationMarker = (props: MarkerProps) => {
   // 获取地图策略
-  const strategy = getMapConfigManager().getStrategy();
+  const [strategy, setStrategy] = useState<any>(null);
+
+  useEffect(() => {
+    getMapConfigManager().getStrategy().then(setStrategy);
+  }, []);
 
   // 内部状态统一使用 WGS84 坐标系，只在显示时根据策略转换
   const [position, setPosition] = useState<LatLng | undefined>(props.position);
 
+  // 🔧 修复：将 useMapEvents 调用移到条件判断之前
   const map = useMapEvents({
     click(e) {
-      if (props.readonly) {
+      if (props.readonly || !strategy) {
         return;
       }
 
@@ -52,6 +57,11 @@ const LocationMarker = (props: MarkerProps) => {
     setPosition(props.position);
   }, [props.position]);
 
+  // 如果策略还没加载，返回null
+  if (!strategy) {
+    return null;
+  }
+
   // 【转换边界】根据地图策略转换为显示坐标
   const displayPosition = position
     ? (() => {
@@ -73,7 +83,16 @@ const LeafletMap = (props: MapProps) => {
   // 获取当前地图配置和策略
   const configManager = getMapConfigManager();
   const config = configManager.getConfig();
-  const strategy = configManager.getStrategy();
+  const [strategy, setStrategy] = useState<any>(null);
+
+  useEffect(() => {
+    getMapConfigManager().getStrategy().then(setStrategy);
+  }, []);
+
+  // 如果策略还没加载，显示加载状态
+  if (!strategy) {
+    return <div className="w-full h-72 flex items-center justify-center bg-gray-100">Loading map...</div>;
+  }
 
   // 默认中心点坐标（从配置获取，WGS84坐标系）
   const defaultCenter = new LatLng(config.center.latitude, config.center.longitude);

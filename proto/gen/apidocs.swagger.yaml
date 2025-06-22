@@ -707,6 +707,8 @@ paths:
                 $ref: '#/definitions/apiv1WorkspaceStorageSetting'
               memoRelatedSetting:
                 $ref: '#/definitions/apiv1WorkspaceMemoRelatedSetting'
+              mapRelatedSetting:
+                $ref: '#/definitions/storeWorkspaceMapRelatedSetting'
             title: setting is the setting to update.
       tags:
         - WorkspaceSettingService
@@ -1982,6 +1984,16 @@ definitions:
       undoCount:
         type: integer
         format: int32
+  WorkspaceMapRelatedSettingMapProvider:
+    type: string
+    enum:
+      - MAP_PROVIDER_UNSPECIFIED
+      - AMAP
+      - OSM
+    default: MAP_PROVIDER_UNSPECIFIED
+    description: |2-
+       - AMAP: AMAP is the AMap provider (高德地图).
+       - OSM: OSM is the OpenStreetMap provider.
   WorkspaceStorageSettingS3Config:
     type: object
     properties:
@@ -2339,6 +2351,8 @@ definitions:
         $ref: '#/definitions/apiv1WorkspaceStorageSetting'
       memoRelatedSetting:
         $ref: '#/definitions/apiv1WorkspaceMemoRelatedSetting'
+      mapRelatedSetting:
+        $ref: '#/definitions/storeWorkspaceMapRelatedSetting'
   apiv1WorkspaceStorageSetting:
     type: object
     properties:
@@ -2503,6 +2517,15 @@ definitions:
             "@type": "type.googleapis.com/google.protobuf.Duration",
             "value": "1.212s"
           }
+  storeWorkspaceMapRelatedSetting:
+    type: object
+    properties:
+      mapProvider:
+        $ref: '#/definitions/WorkspaceMapRelatedSettingMapProvider'
+        description: map_provider is the map service provider.
+      amapApiKey:
+        type: string
+        description: amap_api_key is the API key for Amap (高德地图) service.
   v1Activity:
     type: object
     properties:

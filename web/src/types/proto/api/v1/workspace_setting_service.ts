@@ -6,6 +6,7 @@
 
 /* eslint-disable */
 import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
+import { WorkspaceMapRelatedSetting } from "../../store/workspace_setting";
 
 export const protobufPackage = "memos.api.v1";
 
@@ -18,6 +19,7 @@ export interface WorkspaceSetting {
   generalSetting?: WorkspaceGeneralSetting | undefined;
   storageSetting?: WorkspaceStorageSetting | undefined;
   memoRelatedSetting?: WorkspaceMemoRelatedSetting | undefined;
+  mapRelatedSetting?: WorkspaceMapRelatedSetting | undefined;
 }
 
 export interface WorkspaceGeneralSetting {
@@ -162,7 +164,13 @@ export interface SetWorkspaceSettingRequest {
 }
 
 function createBaseWorkspaceSetting(): WorkspaceSetting {
-  return { name: "", generalSetting: undefined, storageSetting: undefined, memoRelatedSetting: undefined };
+  return {
+    name: "",
+    generalSetting: undefined,
+    storageSetting: undefined,
+    memoRelatedSetting: undefined,
+    mapRelatedSetting: undefined,
+  };
 }
 
 export const WorkspaceSetting: MessageFns<WorkspaceSetting> = {
@@ -178,6 +186,9 @@ export const WorkspaceSetting: MessageFns<WorkspaceSetting> = {
     }
     if (message.memoRelatedSetting !== undefined) {
       WorkspaceMemoRelatedSetting.encode(message.memoRelatedSetting, writer.uint32(34).fork()).join();
+    }
+    if (message.mapRelatedSetting !== undefined) {
+      WorkspaceMapRelatedSetting.encode(message.mapRelatedSetting, writer.uint32(42).fork()).join();
     }
     return writer;
   },
@@ -221,6 +232,14 @@ export const WorkspaceSetting: MessageFns<WorkspaceSetting> = {
           message.memoRelatedSetting = WorkspaceMemoRelatedSetting.decode(reader, reader.uint32());
           continue;
         }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.mapRelatedSetting = WorkspaceMapRelatedSetting.decode(reader, reader.uint32());
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -244,6 +263,9 @@ export const WorkspaceSetting: MessageFns<WorkspaceSetting> = {
       : undefined;
     message.memoRelatedSetting = (object.memoRelatedSetting !== undefined && object.memoRelatedSetting !== null)
       ? WorkspaceMemoRelatedSetting.fromPartial(object.memoRelatedSetting)
+      : undefined;
+    message.mapRelatedSetting = (object.mapRelatedSetting !== undefined && object.mapRelatedSetting !== null)
+      ? WorkspaceMapRelatedSetting.fromPartial(object.mapRelatedSetting)
       : undefined;
     return message;
   },

@@ -1,11 +1,45 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/webp" href="/logo.webp" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f4f4f5" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#18181b" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <!-- PWA相关meta标签 -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Memos" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="Memos" />
+    <meta name="description" content="一个隐私优先的轻量级笔记服务" />
+    <!-- memos.metadata.head -->
     <title>Memos</title>
-  </head>
-  <body>
-    No embeddable frontend found.
+    <script type="module" crossorigin src="/assets/app.Bs6BfbEd.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/react-vendor.C2pVmSMI.js">
+    <link rel="modulepreload" crossorigin href="/assets/mui-vendor.BfJY7Y2W.js">
+    <link rel="modulepreload" crossorigin href="/assets/utils-vendor.82zhWkFh.js">
+    <link rel="modulepreload" crossorigin href="/assets/mermaid-vendor.C4_xNQOv.js">
+    <link rel="modulepreload" crossorigin href="/assets/highlight-vendor.Cv6lnJXk.js">
+    <link rel="modulepreload" crossorigin href="/assets/katex-vendor.dPGygbfH.js">
+    <link rel="modulepreload" crossorigin href="/assets/leaflet-vendor.DkgppqKp.js">
+    <link rel="stylesheet" crossorigin href="/assets/index.DaUivj7s.css">
+    <script type="module">import.meta.url;import("_").catch(()=>1);(async function*(){})().next();if(location.protocol!="file:"){window.__vite_is_modern_browser=true}</script>
+    <script type="module">!function(){if(window.__vite_is_modern_browser)return;console.warn("vite: loading legacy chunks, syntax error above and the same error below should be ignored");var e=document.getElementById("vite-legacy-polyfill"),n=document.createElement("script");n.src=e.src,n.onload=function(){System.import(document.getElementById('vite-legacy-entry').getAttribute('data-src'))},document.body.appendChild(n)}();</script>
+  <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
+  <body class="text-base w-full min-h-[100svh] bg-zinc-50 dark:bg-zinc-900">
+    <div id="root" class="relative w-full min-h-full"></div>
+    <!-- 注入运行时配置 -->
+    <script>
+      window.__MEMOS_CONFIG__ = {
+        mapProvider: '{{.MapProvider}}'
+      };
+    </script>
+    <!-- memos.metadata.body -->
+    <script nomodule>!function(){var e=document,t=e.createElement("script");if(!("noModule"in t)&&"onbeforeload"in t){var n=!1;e.addEventListener("beforeload",(function(e){if(e.target===t)n=!0;else if(!e.target.hasAttribute("nomodule")||!n)return;e.preventDefault()}),!0),t.type="module",t.src=".",e.head.appendChild(t),t.remove()}}();</script>
+    <script nomodule crossorigin id="vite-legacy-polyfill" src="/assets/app-legacy.CBj1p7Jp.js"></script>
+    <script nomodule crossorigin id="vite-legacy-entry" data-src="/assets/app-legacy.D71xmOeX.js">System.import(document.getElementById('vite-legacy-entry').getAttribute('data-src'))</script>
   </body>
 </html>

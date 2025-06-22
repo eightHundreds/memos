@@ -112,8 +112,9 @@ export class AmapStrategy implements MapStrategy {
 
   async reverseGeocode(lng: number, lat: number): Promise<GeocodeResult> {
     try {
+      const [wgsLng, wgsLat] = wgs84togcj02(lng, lat);
       // 使用后端代理接口进行逆地理编码
-      const response = await fetch(`/api/v1/geocode/reverse?lng=${lng}&lat=${lat}`);
+      const response = await fetch(`/api/v1/geocode/reverse?lng=${wgsLng}&lat=${wgsLat}`);
       const data = await response.json();
 
       return {

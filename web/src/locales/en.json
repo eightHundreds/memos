@@ -355,6 +355,16 @@
       "url-suffix-placeholder": "Custom URL suffix, optional",
       "warning-text": "Are you sure to delete storage service \"{{name}}\"? THIS ACTION IS IRREVERSIBLE"
     },
+    "map-config": "Map Configuration",
+    "map-config-section": {
+      "map-provider": "Map Service Provider",
+      "amap": "Amap (高德地图)",
+      "openstreetmap": "OpenStreetMap",
+      "amap-api-key": "Amap API Key",
+      "amap-api-key-placeholder": "Enter your Amap API key",
+      "amap-api-key-description": "Apply for a web service API key from Amap Console",
+      "description": "Select map service provider, affects map display in memo location feature"
+    },
     "system": "System",
     "system-section": {
       "additional-script": "Additional script",

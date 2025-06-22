@@ -313,3 +313,15 @@ export MEMOS_INSTANCE_URL="https://your-domain.com"
 - [buf CLI](https://docs.buf.build/)
 - [Vite 文档](https://vitejs.dev/)
 - [pnpm 文档](https://pnpm.io/) 
+
+
+----
+
+# 增加功能
+
+## 支持高德地图
+
+- 后台新增2个配置
+   - `AMAP_KEY` 高德地图的key
+   - `MAP_PROVIDER` 地图提供商，值为 `amap` 时使用高德地图
+

@@ -37,6 +37,8 @@ func (s *Store) UpsertWorkspaceSetting(ctx context.Context, upsert *storepb.Work
 		valueBytes, err = protojson.Marshal(upsert.GetStorageSetting())
 	} else if upsert.Key == storepb.WorkspaceSettingKey_MEMO_RELATED {
 		valueBytes, err = protojson.Marshal(upsert.GetMemoRelatedSetting())
+	} else if upsert.Key == storepb.WorkspaceSettingKey_MAP_RELATED {
+		valueBytes, err = protojson.Marshal(upsert.GetMapRelatedSetting())
 	} else {
 		return nil, errors.Errorf("unsupported workspace setting key: %v", upsert.Key)
 	}
@@ -208,6 +210,30 @@ func (s *Store) GetWorkspaceStorageSetting(ctx context.Context) (*storepb.Worksp
 	return workspaceStorageSetting, nil
 }
 
+func (s *Store) GetWorkspaceMapRelatedSetting(ctx context.Context) (*storepb.WorkspaceMapRelatedSetting, error) {
+	workspaceSetting, err := s.GetWorkspaceSetting(ctx, &FindWorkspaceSetting{
+		Name: storepb.WorkspaceSettingKey_MAP_RELATED.String(),
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get workspace map related setting")
+	}
+
+	workspaceMapRelatedSetting := &storepb.WorkspaceMapRelatedSetting{}
+	if workspaceSetting != nil {
+		workspaceMapRelatedSetting = workspaceSetting.GetMapRelatedSetting()
+	}
+	// 设置默认值：根据环境变量或默认为AMAP
+	if workspaceMapRelatedSetting.MapProvider == storepb.WorkspaceMapRelatedSetting_MAP_PROVIDER_UNSPECIFIED {
+		// 可以从环境变量读取默认值，但这里先设置为AMAP
+		workspaceMapRelatedSetting.MapProvider = storepb.WorkspaceMapRelatedSetting_AMAP
+	}
+	s.workspaceSettingCache.Set(ctx, storepb.WorkspaceSettingKey_MAP_RELATED.String(), &storepb.WorkspaceSetting{
+		Key:   storepb.WorkspaceSettingKey_MAP_RELATED,
+		Value: &storepb.WorkspaceSetting_MapRelatedSetting{MapRelatedSetting: workspaceMapRelatedSetting},
+	})
+	return workspaceMapRelatedSetting, nil
+}
+
 func convertWorkspaceSettingFromRaw(workspaceSettingRaw *WorkspaceSetting) (*storepb.WorkspaceSetting, error) {
 	workspaceSetting := &storepb.WorkspaceSetting{
 		Key: storepb.WorkspaceSettingKey(storepb.WorkspaceSettingKey_value[workspaceSettingRaw.Name]),
@@ -237,6 +263,12 @@ func convertWorkspaceSettingFromRaw(workspaceSettingRaw *WorkspaceSetting) (*sto
 			return nil, err
 		}
 		workspaceSetting.Value = &storepb.WorkspaceSetting_MemoRelatedSetting{MemoRelatedSetting: memoRelatedSetting}
+	case storepb.WorkspaceSettingKey_MAP_RELATED.String():
+		mapRelatedSetting := &storepb.WorkspaceMapRelatedSetting{}
+		if err := protojsonUnmarshaler.Unmarshal([]byte(workspaceSettingRaw.Value), mapRelatedSetting); err != nil {
+			return nil, err
+		}
+		workspaceSetting.Value = &storepb.WorkspaceSetting_MapRelatedSetting{MapRelatedSetting: mapRelatedSetting}
 	default:
 		// Skip unsupported workspace setting key.
 		return nil, nil

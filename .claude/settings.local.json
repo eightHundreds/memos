@@ -2,7 +2,14 @@
   "permissions": {
     "allow": [
       "Bash(npm run build:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(make:*)",
+      "Bash(buf generate:*)",
+      "Bash(go install:*)",
+      "Bash(grep:*)",
+      "Bash(go build:*)",
+      "Bash(curl:*)"
     ],
     "deny": []
   }

@@ -29,6 +29,8 @@ func (s *APIV1Service) GetWorkspaceSetting(ctx context.Context, request *v1pb.Ge
 		_, err = s.Store.GetWorkspaceMemoRelatedSetting(ctx)
 	case storepb.WorkspaceSettingKey_STORAGE:
 		_, err = s.Store.GetWorkspaceStorageSetting(ctx)
+	case storepb.WorkspaceSettingKey_MAP_RELATED:
+		_, err = s.Store.GetWorkspaceMapRelatedSetting(ctx)
 	default:
 		return nil, status.Errorf(codes.InvalidArgument, "unsupported workspace setting key: %v", workspaceSettingKey)
 	}
@@ -95,6 +97,10 @@ func convertWorkspaceSettingFromStore(setting *storepb.WorkspaceSetting) *v1pb.W
 		workspaceSetting.Value = &v1pb.WorkspaceSetting_MemoRelatedSetting{
 			MemoRelatedSetting: convertWorkspaceMemoRelatedSettingFromStore(setting.GetMemoRelatedSetting()),
 		}
+	case *storepb.WorkspaceSetting_MapRelatedSetting:
+		workspaceSetting.Value = &v1pb.WorkspaceSetting_MapRelatedSetting{
+			MapRelatedSetting: setting.GetMapRelatedSetting(),
+		}
 	}
 	return workspaceSetting
 }
@@ -119,6 +125,10 @@ func convertWorkspaceSettingToStore(setting *v1pb.WorkspaceSetting) *storepb.Wor
 	case storepb.WorkspaceSettingKey_MEMO_RELATED:
 		workspaceSetting.Value = &storepb.WorkspaceSetting_MemoRelatedSetting{
 			MemoRelatedSetting: convertWorkspaceMemoRelatedSettingToStore(setting.GetMemoRelatedSetting()),
+		}
+	case storepb.WorkspaceSettingKey_MAP_RELATED:
+		workspaceSetting.Value = &storepb.WorkspaceSetting_MapRelatedSetting{
+			MapRelatedSetting: setting.GetMapRelatedSetting(),
 		}
 	}
 	return workspaceSetting

@@ -79,7 +79,7 @@ const LocationSelector = (props: Props) => {
   const fetchReverseGeocoding = async (position: LatLng) => {
     try {
       // 使用当前地图策略进行逆地理编码
-      const strategy = getMapConfigManager().getStrategy();
+      const strategy = await getMapConfigManager().getStrategy();
       const result = await strategy.reverseGeocode(position.lng, position.lat);
 
       if (result.success && result.address) {

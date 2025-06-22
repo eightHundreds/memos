@@ -33,16 +33,19 @@ const (
 	WorkspaceSettingKey_STORAGE WorkspaceSettingKey = 3
 	// MEMO_RELATED is the key for memo related settings.
 	WorkspaceSettingKey_MEMO_RELATED WorkspaceSettingKey = 4
+	// MAP_RELATED is the key for map related settings.
+	WorkspaceSettingKey_MAP_RELATED WorkspaceSettingKey = 100
 )
 
 // Enum value maps for WorkspaceSettingKey.
 var (
 	WorkspaceSettingKey_name = map[int32]string{
-		0: "WORKSPACE_SETTING_KEY_UNSPECIFIED",
-		1: "BASIC",
-		2: "GENERAL",
-		3: "STORAGE",
-		4: "MEMO_RELATED",
+		0:   "WORKSPACE_SETTING_KEY_UNSPECIFIED",
+		1:   "BASIC",
+		2:   "GENERAL",
+		3:   "STORAGE",
+		4:   "MEMO_RELATED",
+		100: "MAP_RELATED",
 	}
 	WorkspaceSettingKey_value = map[string]int32{
 		"WORKSPACE_SETTING_KEY_UNSPECIFIED": 0,
@@ -50,6 +53,7 @@ var (
 		"GENERAL":                           2,
 		"STORAGE":                           3,
 		"MEMO_RELATED":                      4,
+		"MAP_RELATED":                       100,
 	}
 )
 
@@ -135,6 +139,57 @@ func (WorkspaceStorageSetting_StorageType) EnumDescriptor() ([]byte, []int) {
 	return file_store_workspace_setting_proto_rawDescGZIP(), []int{4, 0}
 }
 
+type WorkspaceMapRelatedSetting_MapProvider int32
+
+const (
+	WorkspaceMapRelatedSetting_MAP_PROVIDER_UNSPECIFIED WorkspaceMapRelatedSetting_MapProvider = 0
+	// AMAP is the AMap provider (高德地图).
+	WorkspaceMapRelatedSetting_AMAP WorkspaceMapRelatedSetting_MapProvider = 1
+	// OSM is the OpenStreetMap provider.
+	WorkspaceMapRelatedSetting_OSM WorkspaceMapRelatedSetting_MapProvider = 2
+)
+
+// Enum value maps for WorkspaceMapRelatedSetting_MapProvider.
+var (
+	WorkspaceMapRelatedSetting_MapProvider_name = map[int32]string{
+		0: "MAP_PROVIDER_UNSPECIFIED",
+		1: "AMAP",
+		2: "OSM",
+	}
+	WorkspaceMapRelatedSetting_MapProvider_value = map[string]int32{
+		"MAP_PROVIDER_UNSPECIFIED": 0,
+		"AMAP":                     1,
+		"OSM":                      2,
+	}
+)
+
+func (x WorkspaceMapRelatedSetting_MapProvider) Enum() *WorkspaceMapRelatedSetting_MapProvider {
+	p := new(WorkspaceMapRelatedSetting_MapProvider)
+	*p = x
+	return p
+}
+
+func (x WorkspaceMapRelatedSetting_MapProvider) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (WorkspaceMapRelatedSetting_MapProvider) Descriptor() protoreflect.EnumDescriptor {
+	return file_store_workspace_setting_proto_enumTypes[2].Descriptor()
+}
+
+func (WorkspaceMapRelatedSetting_MapProvider) Type() protoreflect.EnumType {
+	return &file_store_workspace_setting_proto_enumTypes[2]
+}
+
+func (x WorkspaceMapRelatedSetting_MapProvider) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use WorkspaceMapRelatedSetting_MapProvider.Descriptor instead.
+func (WorkspaceMapRelatedSetting_MapProvider) EnumDescriptor() ([]byte, []int) {
+	return file_store_workspace_setting_proto_rawDescGZIP(), []int{7, 0}
+}
+
 type WorkspaceSetting struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	Key   WorkspaceSettingKey    `protobuf:"varint,1,opt,name=key,proto3,enum=memos.store.WorkspaceSettingKey" json:"key,omitempty"`
@@ -144,6 +199,7 @@ type WorkspaceSetting struct {
 	//	*WorkspaceSetting_GeneralSetting
 	//	*WorkspaceSetting_StorageSetting
 	//	*WorkspaceSetting_MemoRelatedSetting
+	//	*WorkspaceSetting_MapRelatedSetting
 	Value         isWorkspaceSetting_Value `protobuf_oneof:"value"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -229,6 +285,15 @@ func (x *WorkspaceSetting) GetMemoRelatedSetting() *WorkspaceMemoRelatedSetting 
 	return nil
 }
 
+func (x *WorkspaceSetting) GetMapRelatedSetting() *WorkspaceMapRelatedSetting {
+	if x != nil {
+		if x, ok := x.Value.(*WorkspaceSetting_MapRelatedSetting); ok {
+			return x.MapRelatedSetting
+		}
+	}
+	return nil
+}
+
 type isWorkspaceSetting_Value interface {
 	isWorkspaceSetting_Value()
 }
@@ -249,6 +314,10 @@ type WorkspaceSetting_MemoRelatedSetting struct {
 	MemoRelatedSetting *WorkspaceMemoRelatedSetting `protobuf:"bytes,5,opt,name=memo_related_setting,json=memoRelatedSetting,proto3,oneof"`
 }
 
+type WorkspaceSetting_MapRelatedSetting struct {
+	MapRelatedSetting *WorkspaceMapRelatedSetting `protobuf:"bytes,6,opt,name=map_related_setting,json=mapRelatedSetting,proto3,oneof"`
+}
+
 func (*WorkspaceSetting_BasicSetting) isWorkspaceSetting_Value() {}
 
 func (*WorkspaceSetting_GeneralSetting) isWorkspaceSetting_Value() {}
@@ -256,6 +325,8 @@ func (*WorkspaceSetting_GeneralSetting) isWorkspaceSetting_Value() {}
 func (*WorkspaceSetting_StorageSetting) isWorkspaceSetting_Value() {}
 
 func (*WorkspaceSetting_MemoRelatedSetting) isWorkspaceSetting_Value() {}
+
+func (*WorkspaceSetting_MapRelatedSetting) isWorkspaceSetting_Value() {}
 
 type WorkspaceBasicSetting struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -781,17 +852,72 @@ func (x *WorkspaceMemoRelatedSetting) GetNsfwTags() []string {
 	return nil
 }
 
+type WorkspaceMapRelatedSetting struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// map_provider is the map service provider.
+	MapProvider WorkspaceMapRelatedSetting_MapProvider `protobuf:"varint,1,opt,name=map_provider,json=mapProvider,proto3,enum=memos.store.WorkspaceMapRelatedSetting_MapProvider" json:"map_provider,omitempty"`
+	// amap_api_key is the API key for Amap (高德地图) service.
+	AmapApiKey    string `protobuf:"bytes,2,opt,name=amap_api_key,json=amapApiKey,proto3" json:"amap_api_key,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *WorkspaceMapRelatedSetting) Reset() {
+	*x = WorkspaceMapRelatedSetting{}
+	mi := &file_store_workspace_setting_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *WorkspaceMapRelatedSetting) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WorkspaceMapRelatedSetting) ProtoMessage() {}
+
+func (x *WorkspaceMapRelatedSetting) ProtoReflect() protoreflect.Message {
+	mi := &file_store_workspace_setting_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WorkspaceMapRelatedSetting.ProtoReflect.Descriptor instead.
+func (*WorkspaceMapRelatedSetting) Descriptor() ([]byte, []int) {
+	return file_store_workspace_setting_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *WorkspaceMapRelatedSetting) GetMapProvider() WorkspaceMapRelatedSetting_MapProvider {
+	if x != nil {
+		return x.MapProvider
+	}
+	return WorkspaceMapRelatedSetting_MAP_PROVIDER_UNSPECIFIED
+}
+
+func (x *WorkspaceMapRelatedSetting) GetAmapApiKey() string {
+	if x != nil {
+		return x.AmapApiKey
+	}
+	return ""
+}
+
 var File_store_workspace_setting_proto protoreflect.FileDescriptor
 
 const file_store_workspace_setting_proto_rawDesc = "" +
 	"\n" +
-	"\x1dstore/workspace_setting.proto\x12\vmemos.store\"\x9a\x03\n" +
+	"\x1dstore/workspace_setting.proto\x12\vmemos.store\"\xf5\x03\n" +
 	"\x10WorkspaceSetting\x122\n" +
 	"\x03key\x18\x01 \x01(\x0e2 .memos.store.WorkspaceSettingKeyR\x03key\x12I\n" +
 	"\rbasic_setting\x18\x02 \x01(\v2\".memos.store.WorkspaceBasicSettingH\x00R\fbasicSetting\x12O\n" +
 	"\x0fgeneral_setting\x18\x03 \x01(\v2$.memos.store.WorkspaceGeneralSettingH\x00R\x0egeneralSetting\x12O\n" +
 	"\x0fstorage_setting\x18\x04 \x01(\v2$.memos.store.WorkspaceStorageSettingH\x00R\x0estorageSetting\x12\\\n" +
-	"\x14memo_related_setting\x18\x05 \x01(\v2(.memos.store.WorkspaceMemoRelatedSettingH\x00R\x12memoRelatedSettingB\a\n" +
+	"\x14memo_related_setting\x18\x05 \x01(\v2(.memos.store.WorkspaceMemoRelatedSettingH\x00R\x12memoRelatedSetting\x12Y\n" +
+	"\x13map_related_setting\x18\x06 \x01(\v2'.memos.store.WorkspaceMapRelatedSettingH\x00R\x11mapRelatedSettingB\a\n" +
 	"\x05value\"]\n" +
 	"\x15WorkspaceBasicSetting\x12\x1d\n" +
 	"\n" +
@@ -842,13 +968,22 @@ const file_store_workspace_setting_proto_rawDesc = "" +
 	" \x03(\tR\treactions\x12<\n" +
 	"\x1adisable_markdown_shortcuts\x18\v \x01(\bR\x18disableMarkdownShortcuts\x127\n" +
 	"\x18enable_blur_nsfw_content\x18\f \x01(\bR\x15enableBlurNsfwContent\x12\x1b\n" +
-	"\tnsfw_tags\x18\r \x03(\tR\bnsfwTagsJ\x04\b\x04\x10\x05J\x04\b\b\x10\t*s\n" +
+	"\tnsfw_tags\x18\r \x03(\tR\bnsfwTagsJ\x04\b\x04\x10\x05J\x04\b\b\x10\t\"\xd6\x01\n" +
+	"\x1aWorkspaceMapRelatedSetting\x12V\n" +
+	"\fmap_provider\x18\x01 \x01(\x0e23.memos.store.WorkspaceMapRelatedSetting.MapProviderR\vmapProvider\x12 \n" +
+	"\famap_api_key\x18\x02 \x01(\tR\n" +
+	"amapApiKey\">\n" +
+	"\vMapProvider\x12\x1c\n" +
+	"\x18MAP_PROVIDER_UNSPECIFIED\x10\x00\x12\b\n" +
+	"\x04AMAP\x10\x01\x12\a\n" +
+	"\x03OSM\x10\x02*\x84\x01\n" +
 	"\x13WorkspaceSettingKey\x12%\n" +
 	"!WORKSPACE_SETTING_KEY_UNSPECIFIED\x10\x00\x12\t\n" +
 	"\x05BASIC\x10\x01\x12\v\n" +
 	"\aGENERAL\x10\x02\x12\v\n" +
 	"\aSTORAGE\x10\x03\x12\x10\n" +
-	"\fMEMO_RELATED\x10\x04B\xa0\x01\n" +
+	"\fMEMO_RELATED\x10\x04\x12\x0f\n" +
+	"\vMAP_RELATED\x10dB\xa0\x01\n" +
 	"\x0fcom.memos.storeB\x15WorkspaceSettingProtoP\x01Z)github.com/usememos/memos/proto/gen/store\xa2\x02\x03MSX\xaa\x02\vMemos.Store\xca\x02\vMemos\\Store\xe2\x02\x17Memos\\Store\\GPBMetadata\xea\x02\fMemos::Storeb\x06proto3"
 
 var (
@@ -863,33 +998,37 @@ func file_store_workspace_setting_proto_rawDescGZIP() []byte {
 	return file_store_workspace_setting_proto_rawDescData
 }
 
-var file_store_workspace_setting_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_store_workspace_setting_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_store_workspace_setting_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
+var file_store_workspace_setting_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_store_workspace_setting_proto_goTypes = []any{
-	(WorkspaceSettingKey)(0),                 // 0: memos.store.WorkspaceSettingKey
-	(WorkspaceStorageSetting_StorageType)(0), // 1: memos.store.WorkspaceStorageSetting.StorageType
-	(*WorkspaceSetting)(nil),                 // 2: memos.store.WorkspaceSetting
-	(*WorkspaceBasicSetting)(nil),            // 3: memos.store.WorkspaceBasicSetting
-	(*WorkspaceGeneralSetting)(nil),          // 4: memos.store.WorkspaceGeneralSetting
-	(*WorkspaceCustomProfile)(nil),           // 5: memos.store.WorkspaceCustomProfile
-	(*WorkspaceStorageSetting)(nil),          // 6: memos.store.WorkspaceStorageSetting
-	(*StorageS3Config)(nil),                  // 7: memos.store.StorageS3Config
-	(*WorkspaceMemoRelatedSetting)(nil),      // 8: memos.store.WorkspaceMemoRelatedSetting
+	(WorkspaceSettingKey)(0),                    // 0: memos.store.WorkspaceSettingKey
+	(WorkspaceStorageSetting_StorageType)(0),    // 1: memos.store.WorkspaceStorageSetting.StorageType
+	(WorkspaceMapRelatedSetting_MapProvider)(0), // 2: memos.store.WorkspaceMapRelatedSetting.MapProvider
+	(*WorkspaceSetting)(nil),                    // 3: memos.store.WorkspaceSetting
+	(*WorkspaceBasicSetting)(nil),               // 4: memos.store.WorkspaceBasicSetting
+	(*WorkspaceGeneralSetting)(nil),             // 5: memos.store.WorkspaceGeneralSetting
+	(*WorkspaceCustomProfile)(nil),              // 6: memos.store.WorkspaceCustomProfile
+	(*WorkspaceStorageSetting)(nil),             // 7: memos.store.WorkspaceStorageSetting
+	(*StorageS3Config)(nil),                     // 8: memos.store.StorageS3Config
+	(*WorkspaceMemoRelatedSetting)(nil),         // 9: memos.store.WorkspaceMemoRelatedSetting
+	(*WorkspaceMapRelatedSetting)(nil),          // 10: memos.store.WorkspaceMapRelatedSetting
 }
 var file_store_workspace_setting_proto_depIdxs = []int32{
-	0, // 0: memos.store.WorkspaceSetting.key:type_name -> memos.store.WorkspaceSettingKey
-	3, // 1: memos.store.WorkspaceSetting.basic_setting:type_name -> memos.store.WorkspaceBasicSetting
-	4, // 2: memos.store.WorkspaceSetting.general_setting:type_name -> memos.store.WorkspaceGeneralSetting
-	6, // 3: memos.store.WorkspaceSetting.storage_setting:type_name -> memos.store.WorkspaceStorageSetting
-	8, // 4: memos.store.WorkspaceSetting.memo_related_setting:type_name -> memos.store.WorkspaceMemoRelatedSetting
-	5, // 5: memos.store.WorkspaceGeneralSetting.custom_profile:type_name -> memos.store.WorkspaceCustomProfile
-	1, // 6: memos.store.WorkspaceStorageSetting.storage_type:type_name -> memos.store.WorkspaceStorageSetting.StorageType
-	7, // 7: memos.store.WorkspaceStorageSetting.s3_config:type_name -> memos.store.StorageS3Config
-	8, // [8:8] is the sub-list for method output_type
-	8, // [8:8] is the sub-list for method input_type
-	8, // [8:8] is the sub-list for extension type_name
-	8, // [8:8] is the sub-list for extension extendee
-	0, // [0:8] is the sub-list for field type_name
+	0,  // 0: memos.store.WorkspaceSetting.key:type_name -> memos.store.WorkspaceSettingKey
+	4,  // 1: memos.store.WorkspaceSetting.basic_setting:type_name -> memos.store.WorkspaceBasicSetting
+	5,  // 2: memos.store.WorkspaceSetting.general_setting:type_name -> memos.store.WorkspaceGeneralSetting
+	7,  // 3: memos.store.WorkspaceSetting.storage_setting:type_name -> memos.store.WorkspaceStorageSetting
+	9,  // 4: memos.store.WorkspaceSetting.memo_related_setting:type_name -> memos.store.WorkspaceMemoRelatedSetting
+	10, // 5: memos.store.WorkspaceSetting.map_related_setting:type_name -> memos.store.WorkspaceMapRelatedSetting
+	6,  // 6: memos.store.WorkspaceGeneralSetting.custom_profile:type_name -> memos.store.WorkspaceCustomProfile
+	1,  // 7: memos.store.WorkspaceStorageSetting.storage_type:type_name -> memos.store.WorkspaceStorageSetting.StorageType
+	8,  // 8: memos.store.WorkspaceStorageSetting.s3_config:type_name -> memos.store.StorageS3Config
+	2,  // 9: memos.store.WorkspaceMapRelatedSetting.map_provider:type_name -> memos.store.WorkspaceMapRelatedSetting.MapProvider
+	10, // [10:10] is the sub-list for method output_type
+	10, // [10:10] is the sub-list for method input_type
+	10, // [10:10] is the sub-list for extension type_name
+	10, // [10:10] is the sub-list for extension extendee
+	0,  // [0:10] is the sub-list for field type_name
 }
 
 func init() { file_store_workspace_setting_proto_init() }
@@ -902,14 +1041,15 @@ func file_store_workspace_setting_proto_init() {
 		(*WorkspaceSetting_GeneralSetting)(nil),
 		(*WorkspaceSetting_StorageSetting)(nil),
 		(*WorkspaceSetting_MemoRelatedSetting)(nil),
+		(*WorkspaceSetting_MapRelatedSetting)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_store_workspace_setting_proto_rawDesc), len(file_store_workspace_setting_proto_rawDesc)),
-			NumEnums:      2,
-			NumMessages:   7,
+			NumEnums:      3,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
