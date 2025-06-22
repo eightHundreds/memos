@@ -12,7 +12,6 @@ interface Props {
 const MemoLocationView: React.FC<Props> = (props: Props) => {
   const { location } = props;
   const [popoverOpen, setPopoverOpen] = useState<boolean>(false);
-
   return (
     <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
       <PopoverTrigger asChild>
@@ -27,6 +26,7 @@ const MemoLocationView: React.FC<Props> = (props: Props) => {
         <div className="min-w-80 sm:w-128 flex flex-col justify-start items-start">
           <LeafletMap latlng={new LatLng(location.latitude, location.longitude)} readonly={true} />
         </div>
+        <div className="mt-2 w-full break-words max-w-[100vw]">{location.placeholder}</div>
       </PopoverContent>
     </Popover>
   );
