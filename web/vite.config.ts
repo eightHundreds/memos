@@ -1,4 +1,3 @@
-import basicSsl from "@vitejs/plugin-basic-ssl";
 import legacy from "@vitejs/plugin-legacy";
 import react from "@vitejs/plugin-react";
 import { codeInspectorPlugin } from "code-inspector-plugin";
@@ -58,7 +57,41 @@ export default defineConfig({
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
         runtimeCaching: [
           {
-            urlPattern: /^https:\/\/api\./,
+            urlPattern:
+              /\/memos\.api\.v1\.(WorkspaceService|WorkspaceSettingService|AuthService|UserService)\/(GetWorkspaceProfile|GetWorkspaceSetting|GetAuthStatus|GetUserSetting)/,
+            handler: "StaleWhileRevalidate",
+            options: {
+              cacheName: "config-api-cache",
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24 * 7, // 7天，配置类数据变化较少
+              },
+              // 使用插件来自定义缓存键，包含请求体内容以区分不同的设置请求
+              plugins: [
+                {
+                  cacheKeyWillBeUsed: async ({ request }) => {
+                    const url = request.url;
+                    if (request.method === "POST" && request.body) {
+                      try {
+                        // 读取请求体内容并生成哈希
+                        const bodyBuffer = await request.arrayBuffer();
+                        const bodyHash = Array.from(new Uint8Array(bodyBuffer))
+                          .map((b) => b.toString(16).padStart(2, "0"))
+                          .join("");
+                        return `${url}#${bodyHash}`;
+                      } catch (e) {
+                        console.warn("Failed to hash request body:", e);
+                        return url;
+                      }
+                    }
+                    return url;
+                  },
+                },
+              ],
+            },
+          },
+          {
+            urlPattern: /\/memos\.api\.v1\./,
             handler: "NetworkFirst",
             options: {
               cacheName: "api-cache",
@@ -68,17 +101,7 @@ export default defineConfig({
               },
             },
           },
-          {
-            urlPattern: /^\/api\//,
-            handler: "NetworkFirst",
-            options: {
-              cacheName: "local-api-cache",
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24, // 24小时
-              },
-            },
-          },
+
           {
             urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
             handler: "CacheFirst",
