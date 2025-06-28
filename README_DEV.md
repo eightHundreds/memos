@@ -138,7 +138,7 @@ go build -o build/memos ./bin/memos/main.go
 ./build/memos --mode dev --port 8081
 
 # 生产模式  
-./build/memos --mode prod --port 5230
+./build/memos --mode prod --port 5230 --dsn ./tmp/memos_dev.db
 ```
 
 ## 容器化构建

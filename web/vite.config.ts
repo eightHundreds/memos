@@ -60,6 +60,7 @@ export default defineConfig({
             urlPattern:
               /\/memos\.api\.v1\.(WorkspaceService|WorkspaceSettingService|AuthService|UserService)\/(GetWorkspaceProfile|GetWorkspaceSetting|GetAuthStatus|GetUserSetting)/,
             handler: "StaleWhileRevalidate",
+            method: "POST",
             options: {
               cacheName: "config-api-cache",
               expiration: {
