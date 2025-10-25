@@ -10,6 +10,8 @@ import { Webhook } from './common/entities/webhook.entity';
 import { MemoComment } from './memo/entities/memo-comment.entity';
 import { MemoReaction } from './memo/entities/memo-reaction.entity';
 import { MemoTag } from './memo/entities/memo-tag.entity';
+import { Inbox } from './common/entities/inbox.entity';
+import { Activity } from './common/entities/activity.entity';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { MemoModule } from './memo/memo.module';
@@ -17,6 +19,8 @@ import { WorkspaceModule } from './workspace/workspace.module';
 import { MarkdownModule } from './markdown/markdown.module';
 import { ShortcutModule } from './shortcut/shortcut.module';
 import { WebhookModule } from './webhook/webhook.module';
+import { InboxModule } from './inbox/inbox.module';
+import { ActivityModule } from './activity/activity.module';
 
 @Module({
   imports: [
@@ -28,7 +32,7 @@ import { WebhookModule } from './webhook/webhook.module';
       useFactory: (configService: ConfigService) => ({
         type: 'sqlite',
         database: configService.get('DATABASE_PATH') || 'memos.db',
-        entities: [User, Memo, UserAccessToken, Shortcut, Webhook, MemoComment, MemoReaction, MemoTag],
+        entities: [User, Memo, UserAccessToken, Shortcut, Webhook, MemoComment, MemoReaction, MemoTag, Inbox, Activity],
         synchronize: true, // Set to false in production
         logging: false,
       }),
@@ -41,6 +45,8 @@ import { WebhookModule } from './webhook/webhook.module';
     MarkdownModule,
     ShortcutModule,
     WebhookModule,
+    InboxModule,
+    ActivityModule,
   ],
   controllers: [AppController],
   providers: [AppService],
