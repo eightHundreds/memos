@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Post,
   Patch,
   Delete,
   Param,
@@ -38,5 +39,27 @@ export class UserController {
   @Delete(':id')
   delete(@Param('id', ParseIntPipe) id: number) {
     return this.userService.delete(id);
+  }
+
+  // Access Token Routes
+  @Post(':id/access-tokens')
+  createAccessToken(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { description?: string },
+  ) {
+    return this.userService.createAccessToken(id, body.description);
+  }
+
+  @Get(':id/access-tokens')
+  listAccessTokens(@Param('id', ParseIntPipe) id: number) {
+    return this.userService.listAccessTokens(id);
+  }
+
+  @Delete(':id/access-tokens/:tokenId')
+  deleteAccessToken(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('tokenId', ParseIntPipe) tokenId: number,
+  ) {
+    return this.userService.deleteAccessToken(id, tokenId);
   }
 }

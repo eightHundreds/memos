@@ -4,12 +4,16 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from '../common/entities';
 import { UpdateUserDto } from './dto/user.dto';
+import { UserAccessToken } from './entities/user-access-token.entity';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @InjectRepository(UserAccessToken)
+    private accessTokenRepository: Repository<UserAccessToken>,
   ) {}
 
   async findAll() {
@@ -84,5 +88,52 @@ export class UserService {
     await this.userRepository.remove(user);
 
     return { message: 'User deleted successfully' };
+  }
+
+  // Access Token Methods
+  async createAccessToken(userId: number, description?: string) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Generate a secure random token
+    const token = crypto.randomBytes(32).toString('hex');
+
+    const accessToken = this.accessTokenRepository.create({
+      userId,
+      token,
+      description,
+      createdTs: Date.now(),
+      expiresTs: null, // No expiration by default
+    });
+
+    await this.accessTokenRepository.save(accessToken);
+
+    return accessToken;
+  }
+
+  async listAccessTokens(userId: number) {
+    const tokens = await this.accessTokenRepository.find({
+      where: { userId },
+      order: { createdTs: 'DESC' },
+    });
+
+    return tokens;
+  }
+
+  async deleteAccessToken(userId: number, tokenId: number) {
+    const token = await this.accessTokenRepository.findOne({
+      where: { id: tokenId, userId },
+    });
+
+    if (!token) {
+      throw new NotFoundException('Access token not found');
+    }
+
+    await this.accessTokenRepository.remove(token);
+
+    return { message: 'Access token deleted successfully' };
   }
 }
