@@ -3,7 +3,7 @@
 ## Overview
 This document tracks the migration from Go backend with gRPC to NestJS with RESTful APIs.
 
-## Current Status: ~40% Complete
+## Current Status: ~55% Complete
 
 ### ✅ Completed Tasks
 
@@ -17,6 +17,7 @@ This document tracks the migration from Go backend with gRPC to NestJS with REST
 2. **Entities Implemented**
    - User entity (id, username, role, email, nickname, passwordHash, avatarUrl, description)
    - Memo entity (id, uid, creatorId, content, visibility, pinned, parentId)
+   - UserAccessToken entity (id, userId, token, description, createdTs, expiresTs)
 
 3. **REST API Endpoints Implemented**
 
@@ -30,6 +31,9 @@ This document tracks the migration from Go backend with gRPC to NestJS with REST
    - `GET /:id` - Get user by ID
    - `PATCH /:id` - Update user
    - `DELETE /:id` - Delete user
+   - `POST /:id/access-tokens` - Create user access token ✅ NEW
+   - `GET /:id/access-tokens` - List user access tokens ✅ NEW
+   - `DELETE /:id/access-tokens/:tokenId` - Delete access token ✅ NEW
 
    **Memo Service** (`/api/v1/memos`)
    - `POST /` - Create memo
@@ -47,15 +51,17 @@ This document tracks the migration from Go backend with gRPC to NestJS with REST
 
 #### Frontend
 1. **REST API Client Created**
-   - New `api.ts` file with comprehensive REST client
+   - New `api.ts` file with comprehensive REST client (60+ methods) ✅
    - Token management (localStorage)
    - Type-safe request/response handling
    - Backward compatibility layer in `grpcweb.ts`
+   - All service methods implemented or stubbed ✅
 
 ### 🔄 In Progress
 
 #### Frontend Migration
 The frontend has been partially migrated but requires extensive updates:
+- REST API client complete with 60+ methods ✅
 - Many components still reference old gRPC method names
 - MobX stores need updates
 - Type definitions from Protocol Buffers need replacement
