@@ -7,6 +7,8 @@ import { User, Memo } from './common/entities';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { MemoModule } from './memo/memo.module';
+import { WorkspaceModule } from './workspace/workspace.module';
+import { MarkdownModule } from './markdown/markdown.module';
 
 @Module({
   imports: [
@@ -27,6 +29,8 @@ import { MemoModule } from './memo/memo.module';
     AuthModule,
     UserModule,
     MemoModule,
+    WorkspaceModule,
+    MarkdownModule,
   ],
   controllers: [AppController],
   providers: [AppService],
