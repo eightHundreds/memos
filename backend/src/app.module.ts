@@ -7,6 +7,9 @@ import { User, Memo } from './common/entities';
 import { UserAccessToken } from './user/entities/user-access-token.entity';
 import { Shortcut } from './common/entities/shortcut.entity';
 import { Webhook } from './common/entities/webhook.entity';
+import { MemoComment } from './memo/entities/memo-comment.entity';
+import { MemoReaction } from './memo/entities/memo-reaction.entity';
+import { MemoTag } from './memo/entities/memo-tag.entity';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { MemoModule } from './memo/memo.module';
@@ -25,7 +28,7 @@ import { WebhookModule } from './webhook/webhook.module';
       useFactory: (configService: ConfigService) => ({
         type: 'sqlite',
         database: configService.get('DATABASE_PATH') || 'memos.db',
-        entities: [User, Memo, UserAccessToken, Shortcut, Webhook],
+        entities: [User, Memo, UserAccessToken, Shortcut, Webhook, MemoComment, MemoReaction, MemoTag],
         synchronize: true, // Set to false in production
         logging: false,
       }),
