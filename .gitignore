@@ -60,3 +60,7 @@ lerna-debug.log*
 backend/memos.db
 backend/*.db
 *.db
+
+# Uploaded files
+backend/uploads/
+uploads/
