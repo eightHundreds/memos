@@ -1,12 +1,12 @@
-import { 
-  Controller, 
-  Get, 
-  Post, 
-  Patch, 
-  Delete, 
-  Body, 
-  Param, 
-  UseGuards, 
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
   Request,
   UseInterceptors,
   UploadedFile,
@@ -17,7 +17,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AttachmentService } from './attachment.service';
 import { CreateAttachmentDto, UpdateAttachmentDto } from './dto/attachment.dto';
-import { Response } from 'express';
+import type { Response } from 'express';
 
 @Controller('api/v1/attachments')
 @UseGuards(JwtAuthGuard)
@@ -46,9 +46,16 @@ export class AttachmentController {
   }
 
   @Get(':id/download')
-  async download(@Request() req, @Param('id') id: string, @Res({ passthrough: true }) res: Response) {
-    const { stream, attachment } = await this.attachmentService.getFileStream(+id, req.user.id);
-    
+  async download(
+    @Request() req,
+    @Param('id') id: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const { stream, attachment } = await this.attachmentService.getFileStream(
+      +id,
+      req.user.id,
+    );
+
     res.set({
       'Content-Type': attachment.type,
       'Content-Disposition': `attachment; filename="${attachment.filename}"`,
@@ -58,7 +65,11 @@ export class AttachmentController {
   }
 
   @Patch(':id')
-  update(@Request() req, @Param('id') id: string, @Body() updateDto: UpdateAttachmentDto) {
+  update(
+    @Request() req,
+    @Param('id') id: string,
+    @Body() updateDto: UpdateAttachmentDto,
+  ) {
     return this.attachmentService.update(+id, req.user.id, updateDto);
   }
 
